@@ -1,7 +1,7 @@
 <idea-plugin>
     <id>com.haojiyou.ChineseCharReplacce</id>
     <name>ChineseCharReplacce</name>
-    <vendor email="lixr873@163.com" url="https://123.com">bestxu</vendor>
+    <vendor email="lixr873@163.com" url="https://gitee.com/bestxu/chinese-char-replace">best.xu</vendor>
     <description>
         1. 中文字符替换成英文字符插件.
         2. 注释内不进行替换
