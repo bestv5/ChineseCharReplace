@@ -1,7 +1,10 @@
 # 中文字符标点替换插件
+
 IDEA 插件地址: https://plugins.jetbrains.com/plugin/17228-chinesecharreplacce
 
 支持 idea 2020.3 以上版本.
+
+离线安装下载地址：https://gitee.com/bestxu/chinese-char-replace/releases
 
 # 功能说明:
 该插件自动替换输入的中文标点,不用刻意切换输入法了。在注释区域不会自动替换，以免在写注释时不能输入中文标点。
