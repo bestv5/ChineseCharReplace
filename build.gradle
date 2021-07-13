@@ -34,3 +34,8 @@ patchPluginXml {
 test {
     useJUnitPlatform()
 }
+
+
+wrapper {
+    gradleVersion = '6.8'
+}
