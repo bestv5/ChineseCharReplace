@@ -1,5 +1,5 @@
 # 中文字符标点替换插件
-IDEA 插件地址:
+IDEA 插件地址: https://plugins.jetbrains.com/plugin/17228-chinesecharreplacce
 
 支持 idea 2020.3 以上版本.
 
