@@ -7,7 +7,7 @@
         2. 注释内不进行替换
         3. 支持自定义配置替换字符.
     </description>
-
+    <idea-version since-build="203.5981.*"/>
     <depends>com.intellij.modules.platform</depends>
 
     <extensions defaultExtensionNs="com.intellij">
