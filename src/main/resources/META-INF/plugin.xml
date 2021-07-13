@@ -4,10 +4,10 @@
     <vendor email="lixr873@163.com" url="https://gitee.com/bestxu/chinese-char-replace">best.xu</vendor>
     <description>
         1. 中文字符替换成英文字符插件.
-        2. 注释内不进行替换
+        2. 注释内不进行替换.
         3. 支持自定义配置替换字符.
     </description>
-    <idea-version since-build="203.5981.*"/>
+    <idea-version since-build="203.5981"/>
     <depends>com.intellij.modules.platform</depends>
 
     <extensions defaultExtensionNs="com.intellij">
@@ -18,7 +18,7 @@
 
     <actions>
         <action id="ChineseCharReplace"
-                class="com.haojiyou.cnChar.EditorHandlerIllustration">
+                class="com.haojiyou.cnChar.action.EditorHandlerIllustration">
         </action>
     </actions>
 

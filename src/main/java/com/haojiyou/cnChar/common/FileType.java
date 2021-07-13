@@ -15,6 +15,7 @@ public enum FileType {
     JS("js"),
     MARKDOWN("md"),
     PROPERTIES("properties"),
+    GIT_IGNORE("gitignore"),
     CSS("css");
 
 

@@ -24,6 +24,9 @@ public class CommentUtil {
         COMMENT_END_MAP.put(FileType.SQL.getType(), new String[]{"*/"});
 
 
+        COMMENT_START_MAP.put(FileType.GIT_IGNORE.getType(), new String[] {"#" });
+        COMMENT_START_MAP.put(FileType.MARKDOWN.getType(), new String[] {"#","--" });
+
     }
 
 
