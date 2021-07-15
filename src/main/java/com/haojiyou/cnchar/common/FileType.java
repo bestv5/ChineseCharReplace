@@ -1,4 +1,4 @@
-package com.haojiyou.cnChar.common;
+package com.haojiyou.cnchar.common;
 
 import org.apache.commons.lang3.StringUtils;
 

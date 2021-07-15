@@ -11,14 +11,15 @@
     <depends>com.intellij.modules.platform</depends>
 
     <extensions defaultExtensionNs="com.intellij">
-        <applicationConfigurable parentId="tools" instance="com.haojiyou.cnChar.CnCharSettingComponent"
+        <applicationConfigurable parentId="tools" instance="com.haojiyou.cnchar.CnCharSettingComponent"
                              id="com.haojiyou.CnCharSetting" displayName="ChineseCharReplacce"
                              nonDefaultProject="true"/>
+    <typedHandler implementation="com.haojiyou.cnchar.handler.ChineseCharCheckHandler" id="com.haojiyou.cnchar.CnCharReplaceTypedHandler"/>
     </extensions>
 
     <actions>
         <action id="ChineseCharReplace"
-                class="com.haojiyou.cnChar.action.EditorHandlerIllustration">
+                class="com.haojiyou.cnchar.action.EditorHandlerIllustration">
         </action>
     </actions>
 

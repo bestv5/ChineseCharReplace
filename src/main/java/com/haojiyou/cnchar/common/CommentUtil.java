@@ -1,8 +1,9 @@
-package com.haojiyou.cnChar.common;
+package com.haojiyou.cnchar.common;
 
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.HashMap;
+import java.util.Map;
 
 /**
  * 描述:
@@ -11,8 +12,8 @@ import java.util.HashMap;
  */
 public class CommentUtil {
 
-    private static HashMap COMMENT_START_MAP = new HashMap();
-    private static HashMap COMMENT_END_MAP = new HashMap();
+    private static final Map<String, String[]> COMMENT_START_MAP = new HashMap<>();
+    private static final Map<String, String[]> COMMENT_END_MAP = new HashMap<>();
 
     static {
         COMMENT_START_MAP.put(FileType.JAVA.getType(), new String[]{"//", "/*", "*"});
@@ -35,8 +36,8 @@ public class CommentUtil {
             //不支持的文件类型,目前暂不转换
             return true;
         }
-        String[] commentStartFlags = (String[]) COMMENT_START_MAP.get(fileType.getType());
-        String[] commentEndFlags = (String[]) COMMENT_END_MAP.get(fileType.getType());
+        String[] commentStartFlags = COMMENT_START_MAP.get(fileType.getType());
+        String[] commentEndFlags = COMMENT_END_MAP.get(fileType.getType());
         boolean result = false;
         if (commentStartFlags != null){
             result = StringUtils.startsWithAny(StringUtils.trim(line),commentStartFlags );

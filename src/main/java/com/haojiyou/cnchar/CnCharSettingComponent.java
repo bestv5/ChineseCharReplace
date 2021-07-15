@@ -1,5 +1,6 @@
-package com.haojiyou.cnChar;
+package com.haojiyou.cnchar;
 
+import com.haojiyou.cnchar.common.ReplaceCharConfig;
 import com.intellij.ide.util.PropertiesComponent;
 import com.intellij.openapi.options.Configurable;
 import org.jetbrains.annotations.Nullable;
@@ -84,7 +85,7 @@ public class CnCharSettingComponent implements Configurable {
                 int response = JOptionPane.showConfirmDialog(settingPanel,"确定恢复默认吗？",getDisplayName(), JOptionPane.YES_NO_OPTION);
                 if (response == 0) {
                     PropertiesComponent.getInstance().setValue(KEY, DEFAULT_STRING);
-                    CnCharReplaceTypedHandler.reload();
+                    ReplaceCharConfig.reload();
                     reset();
                 }
             }
@@ -125,7 +126,7 @@ public class CnCharSettingComponent implements Configurable {
     public void apply() {
         String str = getConfigString();
         PropertiesComponent.getInstance().setValue(KEY, str);
-        CnCharReplaceTypedHandler.reload();
+        ReplaceCharConfig.reload();
     }
     @Override
     //点reset按钮,打开页面时调用
