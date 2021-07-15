@@ -4,7 +4,11 @@ IDEA 插件地址: https://plugins.jetbrains.com/plugin/17228-chinesecharreplacc
 
 支持 idea 2020.3 以上版本.
 
-离线安装下载地址：https://gitee.com/bestxu/chinese-char-replace/releases
+离线安装下载地址：
+
+gitee: https://gitee.com/bestxu/chinese-char-replace/releases
+
+github: https://github.com/ranbest/ChineseCharReplace/releases
 
 # 功能说明:
 1. 该插件自动替换输入的中文标点,不用刻意切换输入法了，大大减少键盘按键寿命。
