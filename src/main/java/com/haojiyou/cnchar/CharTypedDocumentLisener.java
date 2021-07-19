@@ -44,21 +44,25 @@ public class CharTypedDocumentLisener implements DocumentListener {
 
     public void documentChanged(@NotNull DocumentEvent event, Editor editor) {
         if (editor == null){
+            LOG.info("editor is null");
             return;
         }
         if (event.getNewLength() > 5 || !(editor instanceof EditorImpl)){
             //输入长度大于5，不处理
+            LOG.info("input char length > 5");
             return;
         }
 
         String originalText = event.getNewFragment().toString();
         if (StringUtils.isBlank(originalText)){
+            LOG.info("originalText is blank! return ");
             return;
         }
 
         String replacement = ReplaceCharConfig.cnCharMap.get(originalText);
         if (StringUtils.isBlank(replacement)) {
             //没有找到映射的值就不转换了
+            LOG.info("replacement is blank! return ");
             return;
         }
 

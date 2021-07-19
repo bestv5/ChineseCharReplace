@@ -9,18 +9,13 @@
     </description>
     <idea-version since-build="203.5981"/>
     <depends>com.intellij.modules.platform</depends>
+    <depends>com.intellij.modules.lang</depends>
 
     <extensions defaultExtensionNs="com.intellij">
         <applicationConfigurable parentId="tools" instance="com.haojiyou.cnchar.CnCharSettingComponent"
                              id="com.haojiyou.CnCharSetting" displayName="ChineseCharReplace"
                              nonDefaultProject="true"/>
     <typedHandler implementation="com.haojiyou.cnchar.handler.ChineseCharCheckHandler" id="com.haojiyou.cnchar.ChineseCharCheckHandler"/>
+        <applicationService serviceImplementation="com.haojiyou.cnchar.service.HintService" id="hintService" />
     </extensions>
-
-    <actions>
-        <action id="ChineseCharReplace"
-                class="com.haojiyou.cnchar.action.EditorHandlerIllustration">
-        </action>
-    </actions>
-
 </idea-plugin>

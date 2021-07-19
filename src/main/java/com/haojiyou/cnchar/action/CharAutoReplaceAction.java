@@ -1,7 +1,6 @@
 package com.haojiyou.cnchar.action;
 
-import com.haojiyou.cnchar.common.DocumentUtil;
-import com.haojiyou.cnchar.handler.HintHandler;
+import com.haojiyou.cnchar.service.HintService;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.command.WriteCommandAction;
 import com.intellij.openapi.diagnostic.Logger;
@@ -28,11 +27,16 @@ public class CharAutoReplaceAction {
         int currentOffset = event.getOffset() + event.getNewLength();
 
         ApplicationManager.getApplication().invokeLater(()-> {
+            if (editor.isDisposed()) {
+                LOG.info("editor is disposed, project:"+editor.getProject().getName());
+                return;
+            }
             WriteCommandAction.runWriteCommandAction(project, new Runnable() {
                 @Override
                 public void run() {
                     document.replaceString(event.getOffset(), currentOffset, replacement);
-                    HintHandler.INSTANCE.showHint((EditorImpl) editor, currentOffset,HintHandler.INSTANCE.createHint(originalText,
+                    LOG.info("input char: "+ originalText +" replaced: " + replacement);
+                    HintService.getInstance().showHint((EditorImpl) editor, HintService.INSTANCE.createHint(originalText,
                             replacement),null);
                 }
             });
@@ -47,12 +51,16 @@ public class CharAutoReplaceAction {
         Runnable replaceTask = new Runnable() {
             @Override
             public void run() {
+                LOG.info("input char: "+ originalText +" replaced: " + replacement);
                 document.replaceString(event.getOffset(), currentOffset, replacement);
+                HintService.getInstance().showHint((EditorImpl) editor, HintService.INSTANCE.createHint(originalText,
+                        replacement),null);
             }
         };
 
         ApplicationManager.getApplication().invokeAndWait(() -> {
             if (editor.isDisposed()) {
+                LOG.info("editor is disposed, project:"+editor.getProject().getName());
                 return;
             }
             WriteCommandAction.runWriteCommandAction(project, replaceTask);

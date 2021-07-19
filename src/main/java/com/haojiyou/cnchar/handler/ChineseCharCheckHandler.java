@@ -49,10 +49,10 @@ public class ChineseCharCheckHandler extends TypedHandlerDelegate {
         PsiComment comment = PsiTreeUtil.getParentOfType(element, PsiComment.class, false);
         if (comment != null) {
             //comment 不为空，就认为此处是注释区域，不会替换中文字符。
-            System.out.println("Jetbrains api 识别的注释不替换。");
+            LOG.info("Jetbrains api 识别的注释不替换。");
         } else if (CommentUtil.isCustomComment(document,project,caretOffset)) {
             //是自定义注释区域，不会替换中文字符。
-            System.out.println("是自定义注释,不替换。");
+            LOG.info("是自定义注释,不替换。");
         }else {
             //不是自定义注释区域，准备替换字符工作
             document.addDocumentListener(new CharTypedDocumentLisener(editor));
