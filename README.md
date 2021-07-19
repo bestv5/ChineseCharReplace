@@ -23,6 +23,8 @@ settings - Tools -  ChineseCharReplace
 `中配置。
 3. 最好关闭输入法中，自动中文变英文标点功能。
 
+# 已知问题：
+1. sql中只能识别单行注释，块注释还有问题。
 
 # 希望懂插件开发或者熟悉jetbrains platform api 的朋友帮我完善功能.
 
