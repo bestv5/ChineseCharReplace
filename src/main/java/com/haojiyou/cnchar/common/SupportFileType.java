@@ -7,7 +7,7 @@ import org.apache.commons.lang3.StringUtils;
  *
  * @author : lixuran
  */
-public enum FileType {
+public enum SupportFileType {
     JAVA("java"),
     XML("xml"),
     SQL("sql"),
@@ -21,7 +21,7 @@ public enum FileType {
 
     private String type;
 
-    FileType(String type) {
+    SupportFileType(String type) {
         this.type = type;
     }
 
@@ -29,12 +29,12 @@ public enum FileType {
         return type;
     }
 
-    public static FileType getFileType(String fileExtension){
+    public static SupportFileType getFileType(String fileExtension){
         if (fileExtension == null) {
             return null;
         }
 
-        for (FileType type : FileType.values()){
+        for (SupportFileType type : SupportFileType.values()){
             if (StringUtils.equalsIgnoreCase(fileExtension, type.type )){
                 return type;
             }

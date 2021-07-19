@@ -1,17 +1,16 @@
 package com.haojiyou.cnchar.handler;
 
-import com.haojiyou.cnchar.MyDocumentLisener;
+import com.haojiyou.cnchar.CharTypedDocumentLisener;
 import com.haojiyou.cnchar.common.CommentUtil;
 import com.haojiyou.cnchar.common.ReplaceCharConfig;
 import com.intellij.codeInsight.editorActions.TypedHandlerDelegate;
+import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.editor.Caret;
 import com.intellij.openapi.editor.CaretModel;
 import com.intellij.openapi.editor.Document;
 import com.intellij.openapi.editor.Editor;
-import com.intellij.openapi.fileEditor.FileEditorManager;
 import com.intellij.openapi.fileTypes.FileType;
 import com.intellij.openapi.project.Project;
-import com.intellij.openapi.util.TextRange;
 import com.intellij.psi.PsiComment;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
@@ -24,6 +23,7 @@ import org.jetbrains.annotations.NotNull;
  * @author : best.xu
  */
 public class ChineseCharCheckHandler extends TypedHandlerDelegate {
+    private static final Logger LOG = Logger.getInstance(ChineseCharCheckHandler.class);
 
     @Override
     public @NotNull Result beforeCharTyped(char c, @NotNull Project project, @NotNull Editor editor, @NotNull PsiFile file, @NotNull FileType fileType) {
@@ -43,35 +43,20 @@ public class ChineseCharCheckHandler extends TypedHandlerDelegate {
         //当前光标元素
         PsiElement element = file.findElementAt(caretOffset);
         if (element == null){
-            return super.beforeCharTyped(c, project, editor, file, fileType);
+            return Result.CONTINUE;
         }
         //判断当前行是否是注释
         PsiComment comment = PsiTreeUtil.getParentOfType(element, PsiComment.class, false);
         if (comment != null) {
             //comment 不为空，就认为此处是注释区域，不会替换中文字符。
-            return super.beforeCharTyped(c, project, editor, file, fileType);
-        } else {
-            //当前行号
-            int currentLineNumber = document.getLineNumber(caretOffset);
-
-            //当前行开始、结束光标
-            int currentLineStartOffset = document.getLineStartOffset(currentLineNumber);
-            int currentLineEndOffset = document.getLineEndOffset(currentLineNumber);
-
-            //当前行文本
-            String currentLineText = document.getText(TextRange.create(currentLineStartOffset, currentLineEndOffset));
-            //文件扩展名
-            String extension = FileEditorManager.getInstance(project).getSelectedEditor().getFile().getExtension();
-
-            if (!CommentUtil.isComment(currentLineText, com.haojiyou.cnchar.common.FileType.getFileType(extension))) {
-                //不是自定义注释区域，准备替换字符工作
-                document.addDocumentListener(new MyDocumentLisener());
-            }
-
-            return super.beforeCharTyped(c, project, editor, file, fileType);
-
+            LOG.info("Jetbrains api 识别的注释不替换。");
+        } else if (CommentUtil.isCustomComment(document,project,caretOffset)) {
+            //是自定义注释区域，不会替换中文字符。
+            LOG.info("是自定义注释,不替换。");
+        }else {
+            //不是自定义注释区域，准备替换字符工作
+            document.addDocumentListener(new CharTypedDocumentLisener(editor));
         }
-
-
+        return Result.CONTINUE;
     }
 }

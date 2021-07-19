@@ -3,24 +3,17 @@
     <name>ChineseCharReplace</name>
     <vendor email="lixr873@163.com" url="https://github.com/ranbest/ChineseCharReplace">best.xu</vendor>
     <description>
-        1. 中文字符替换成英文字符插件.
-        2. 注释内不进行替换.
-        3. 支持自定义配置替换字符.
+        中文字符自动替换成英文字符插件。提高了写代码效率，再也不用担心写注释和代码忘记切换输入法了；并且能够识别注释，注释区域内不进行替换；仅支持配置的字符进行替换；
     </description>
     <idea-version since-build="203.5981"/>
     <depends>com.intellij.modules.platform</depends>
+    <depends>com.intellij.modules.lang</depends>
 
     <extensions defaultExtensionNs="com.intellij">
         <applicationConfigurable parentId="tools" instance="com.haojiyou.cnchar.CnCharSettingComponent"
-                             id="com.haojiyou.CnCharSetting" displayName="ChineseCharReplace"
-                             nonDefaultProject="true"/>
-    <typedHandler implementation="com.haojiyou.cnchar.handler.ChineseCharCheckHandler" id="com.haojiyou.cnchar.ChineseCharCheckHandler"/>
+                                 id="com.haojiyou.CnCharSetting" displayName="ChineseCharReplace"
+                                 nonDefaultProject="true"/>
+        <typedHandler implementation="com.haojiyou.cnchar.handler.ChineseCharCheckHandler" id="com.haojiyou.cnchar.ChineseCharCheckHandler"/>
+        <applicationService serviceImplementation="com.haojiyou.cnchar.service.HintService" id="hintService"/>
     </extensions>
-
-    <actions>
-        <action id="ChineseCharReplace"
-                class="com.haojiyou.cnchar.action.EditorHandlerIllustration">
-        </action>
-    </actions>
-
 </idea-plugin>
