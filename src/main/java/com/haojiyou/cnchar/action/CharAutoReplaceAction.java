@@ -24,6 +24,11 @@ public class CharAutoReplaceAction {
     public synchronized void replace(@NotNull DocumentEvent event, Editor editor,String originalText, String replacement){
         Document document = event.getDocument();
         Project project = editor.getProject();
+        if (project == null){
+            LOG.warn("projcet is null! returned.");
+            return;
+        }
+
         int currentOffset = event.getOffset() + event.getNewLength();
 
         ApplicationManager.getApplication().invokeLater(()-> {
