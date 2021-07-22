@@ -1,18 +1,22 @@
 package com.haojiyou.cnchar;
 
 import com.haojiyou.cnchar.action.CharAutoReplaceAction;
+import com.haojiyou.cnchar.common.CnCharCommentUtil;
 import com.haojiyou.cnchar.common.ReplaceCharConfig;
-import com.haojiyou.cnchar.handler.ChineseCharCheckHandler;
-import com.intellij.openapi.application.ApplicationManager;
-import com.intellij.openapi.command.CommandProcessor;
-import com.intellij.openapi.command.WriteCommandAction;
 import com.intellij.openapi.diagnostic.Logger;
+import com.intellij.openapi.editor.Caret;
+import com.intellij.openapi.editor.CaretModel;
 import com.intellij.openapi.editor.Document;
 import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.editor.event.DocumentEvent;
 import com.intellij.openapi.editor.event.DocumentListener;
 import com.intellij.openapi.editor.impl.EditorImpl;
 import com.intellij.openapi.project.Project;
+import com.intellij.psi.PsiComment;
+import com.intellij.psi.PsiElement;
+import com.intellij.psi.PsiFile;
+import com.intellij.psi.PsiWhiteSpace;
+import com.intellij.psi.util.PsiTreeUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 
@@ -24,11 +28,13 @@ import org.jetbrains.annotations.NotNull;
 public class CharTypedDocumentLisener implements DocumentListener {
     private static final Logger LOG = Logger.getInstance(CharTypedDocumentLisener.class);
 
-    private Editor editor;
+    private Editor myEditor;
+    private PsiFile myFile;
 
 
-    public CharTypedDocumentLisener(Editor editor){
-        this.editor = editor;
+    public CharTypedDocumentLisener(Editor editor, PsiFile file) {
+        this.myEditor = editor;
+        this.myFile = file;
     }
 
 
@@ -39,34 +45,26 @@ public class CharTypedDocumentLisener implements DocumentListener {
 
     @Override
     public void documentChanged(@NotNull DocumentEvent event) {
-        this.documentChanged(event, this.editor);
+        this.documentChanged(event, this.myEditor);
     }
 
     public void documentChanged(@NotNull DocumentEvent event, Editor editor) {
-        if (editor == null){
+        if (myEditor == null) {
             LOG.info("editor is null");
             return;
         }
-        if (event.getNewLength() > 5 || !(editor instanceof EditorImpl)){
+        if (event.getNewLength() > 5 || !(myEditor instanceof EditorImpl)) {
             //输入长度大于5，不处理
             LOG.info("input char length > 5");
             return;
         }
 
         String originalText = event.getNewFragment().toString();
-        if (StringUtils.isBlank(originalText)){
-            LOG.info("originalText is blank! return ");
-            return;
-        }
-
         String replacement = ReplaceCharConfig.cnCharMap.get(originalText);
-        if (StringUtils.isBlank(replacement)) {
-            //没有找到映射的值就不转换了
-            LOG.info("replacement is blank! return ");
-            return;
+        if (isCanBeReplaced(originalText, replacement, editor.getProject(), editor.getDocument(), editor, this.myFile)) {
+            CharAutoReplaceAction.INSTANCE.replace(event, editor, originalText, replacement);
         }
 
-        CharAutoReplaceAction.INSTANCE.replace(event,editor,originalText,replacement);
 
         event.getDocument().removeDocumentListener(CharTypedDocumentLisener.this);
 
@@ -82,4 +80,91 @@ public class CharTypedDocumentLisener implements DocumentListener {
     public void bulkUpdateFinished(@NotNull Document document) {
         DocumentListener.super.bulkUpdateFinished(document);
     }
+
+
+    /**
+     * 判断是否要替换
+     *
+     * @param originalText 输入字符
+     * @param project      项目
+     * @param document     文档对象
+     * @param editor       当前的编辑器对象
+     * @param file         当前文件对象
+     * @return
+     */
+    private boolean isCanBeReplaced(String originalText, String replacement, Project project, Document document, Editor editor, PsiFile file) {
+        if (StringUtils.isBlank(originalText)) {
+            LOG.info("originalText is blank! return ");
+            return false;
+        }
+
+        if (StringUtils.isBlank(replacement)) {
+            //没有找到映射的值就不转换了
+            LOG.info("not fond replace char in settings maps! it will not repleaced. ");
+            return false;
+        }
+
+        final CaretModel caretModel = editor.getCaretModel();
+        final Caret primaryCaret = caretModel.getPrimaryCaret();
+        int caretOffset = primaryCaret.getOffset();
+        //判断当前行是否是注释
+        PsiComment comment = null;
+        //当前光标元素
+        PsiElement element = file.findElementAt(caretOffset);
+
+        if (element == null) {
+            //看自定义注释
+            LOG.info("current offset element is null!");
+            if (CnCharCommentUtil.isCustomComment(document, project, caretOffset)) {
+                //是自定义注释区域，不会替换中文字符。
+                LOG.info("是自定义注释,不替换。");
+                return false;
+            }
+            return true;
+        }
+        comment = PsiTreeUtil.getParentOfType(element, PsiComment.class, false);
+        if (comment != null) {
+            // 是注释区域,不替换
+            return false;
+        }
+
+        if (element instanceof PsiWhiteSpace) {
+            if (caretOffset > 0) {
+                //如果光标位置是空，查找前一个光标的元素
+                element = file.findElementAt(caretOffset - 1);
+                comment = PsiTreeUtil.getParentOfType(element, PsiComment.class, false);
+                if (comment != null) {
+                    //前一个光标位置是注释元素，要判断是否是块注释末尾
+                    //如果是块注释末尾，说明当前输入是注释区域外（代码区），就要替换。
+                    if (CnCharCommentUtil.isAfterEndOfComment(document, project, caretOffset)) {
+                        return true;
+                    }
+                    return false;
+                }
+            }
+        }
+            if (element != null) {
+                comment = PsiTreeUtil.getParentOfType(element, PsiComment.class, false);
+            }
+
+
+            if (comment != null) {
+                //comment 不为空，就认为此处是注释区域，不会替换中文字符。
+                LOG.info("Jetbrains api 识别的注释不替换。");
+                return false;
+            }
+
+            if (CnCharCommentUtil.isCustomComment(document, project, caretOffset)) {
+                //是自定义注释区域，不会替换中文字符。
+                LOG.info("是自定义注释,不替换。");
+                return false;
+            }
+
+            if (StringUtils.equalsIgnoreCase("Dummy.txt", file.getName())) {
+                //git commit窗口输入跳过
+                LOG.info("识别出git提交编辑窗口,跳过");
+                return false;
+            }
+            return true;
+        }
 }

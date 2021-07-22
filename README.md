@@ -23,8 +23,9 @@ settings - Tools -  ChineseCharReplace
 `中配置。
 3. 最好关闭输入法中，自动中文变英文标点功能。
 
-# 已知问题：
+# 待解决问题：
 1. sql中只能识别单行注释，块注释还有问题。
+2. java 单行注释后,注释块尾注释不能识别出代码还是注释。(已解决)
 
 # 希望懂插件开发或者熟悉jetbrains platform api 的朋友帮我完善功能.
 

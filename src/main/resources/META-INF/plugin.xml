@@ -7,6 +7,7 @@
     </description>
     <idea-version since-build="203.5981"/>
     <depends>com.intellij.modules.platform</depends>
+    <depends>com.intellij.modules.lang</depends>
 
     <extensions defaultExtensionNs="com.intellij">
         <applicationConfigurable parentId="tools" instance="com.haojiyou.cnchar.CnCharSettingComponent"
@@ -15,4 +16,5 @@
         <typedHandler implementation="com.haojiyou.cnchar.handler.ChineseCharCheckHandler" id="com.haojiyou.cnchar.ChineseCharCheckHandler"/>
         <applicationService serviceImplementation="com.haojiyou.cnchar.service.HintService" id="hintService"/>
     </extensions>
+
 </idea-plugin>
