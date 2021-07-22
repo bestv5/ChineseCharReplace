@@ -52,7 +52,13 @@ test {
     useJUnitPlatform()
 }
 
+buildSearchableOptions.enabled = false
 
 wrapper {
     gradleVersion = '6.8'
 }
+
+runIde{
+    autoReloadPlugins = true
+}
+
