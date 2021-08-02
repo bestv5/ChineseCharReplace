@@ -5,6 +5,11 @@
 3. 支持大部分文件类型（我目前使用的语言是java、js、SQL、markdown等），其他语言没有测试过，兼容性不完全保证。
 4. 支持 idea 2020.3 以上版本.
 
+# 代码仓库
+1) **github**: [https://github.com/ranbest/ChineseCharReplace](https://github.com/ranbest/ChineseCharReplace)
+
+
+2) **gitee**: [https://gitee.com/bestxu/chinese-char-replace](https://gitee.com/bestxu/chinese-char-replace)
 # 安装
 Jetbrains Plugin Marketplace : [17228-chinesecharreplacce](https://plugins.jetbrains.com/plugin/17228-chinesecharreplacce)
 
@@ -12,13 +17,10 @@ Jetbrains Plugin Marketplace : [17228-chinesecharreplacce](https://plugins.jetbr
 
 
 离线安装下载地址：
-
-  1) **github**: [https://github.com/ranbest/ChineseCharReplace/releases](https://github.com/ranbest/ChineseCharReplace/releases)
-
-
-  2) **gitee**: [https://gitee.com/bestxu/chinese-char-replace/releases](https://gitee.com/bestxu/chinese-char-replace/releases)
+    
+**gitee**: [https://gitee.com/bestxu/chinese-char-replace/releases](https://gitee.com/bestxu/chinese-char-replace/releases)
   
-  注意：仓库在同步过程中，release中的附件可能同步不到，以github为主。
+  仓库在同步过程中，release不能同步到github,只能在gitee中下载。
   
 
 

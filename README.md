@@ -12,16 +12,21 @@
 
  4. support idea 2020.3+ .
 
+# code repo：
+
+1) **github**: [https://github.com/ranbest/ChineseCharReplace](https://github.com/ranbest/ChineseCharReplace)
+
+
+2) **gitee**: [https://gitee.com/bestxu/chinese-char-replace](https://gitee.com/bestxu/chinese-char-replace)
+
+
 # install
 
   Jetbrains Plugin Marketplace : [17228-chinesecharreplacce](https://plugins.jetbrains.com/plugin/17228-chinesecharreplacce)
 
   Offline installation download url：
-  
-  1) **github**: [https://github.com/ranbest/ChineseCharReplace/releases](https://github.com/ranbest/ChineseCharReplace/releases)
 
-
-  2) **gitee**: [https://gitee.com/bestxu/chinese-char-replace/releases](https://gitee.com/bestxu/chinese-char-replace/releases)
+  **gitee**: [https://gitee.com/bestxu/chinese-char-replace/releases](https://gitee.com/bestxu/chinese-char-replace/releases)
 
 
 
