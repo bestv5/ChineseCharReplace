@@ -1,33 +1,37 @@
-# 中文字符标点替换插件
+# Chinese character replacemet
 
-IDEA 插件地址: https://plugins.jetbrains.com/plugin/17228-chinesecharreplacce
+# description:
+ 1. The plug-in automatically replaces the input Chinese punctuation without deliberately switching the input method, which greatly reduces the service life of the keyboard keys.
 
-支持 idea 2020.3 以上版本.
 
-离线安装下载地址：
+ 2. It is not automatically replaced in the annotation area. The annotation part is probably entered in Chinese. Therefore, the comment area is not automatically replaced
 
-gitee: https://gitee.com/bestxu/chinese-char-replace/releases
 
-github: https://github.com/ranbest/ChineseCharReplace/releases
+ 3. Most file types (development languages) are supported. If individual file types are not supported.
 
-# 功能说明:
-1. 该插件自动替换输入的中文标点,不用刻意切换输入法了，大大减少键盘按键寿命。
-2. 在注释区域不会自动替换。注释部分还是大概率使用中文输入的。所以注释区域就不自动替换了。
-3. 支持大部分文件类型（开发语言）。个别文件类型不支持的，可以提功能增加。
 
-# 使用说明：
-1. 下载安装插件。
-2. 配置自己想替换的符号。
-   在  `
-settings - Tools -  ChineseCharReplace 
-`中配置。
-3. 最好关闭输入法中，自动中文变英文标点功能。
+ 4. support idea 2020.3+ .
 
-# 待解决问题：
-1. sql中只能识别单行注释，块注释还有问题。
-2. java 单行注释后,注释块尾注释不能识别出代码还是注释。(已解决)
+# install
 
-# 希望懂插件开发或者熟悉jetbrains platform api 的朋友帮我完善功能.
+  Jetbrains Plugin Marketplace : [17228-chinesecharreplacce](https://plugins.jetbrains.com/plugin/17228-chinesecharreplacce)
+
+  Offline installation download url：
+  
+  1) **github**: [https://github.com/ranbest/ChineseCharReplace/releases](https://github.com/ranbest/ChineseCharReplace/releases)
+
+
+  2) **gitee**: [https://gitee.com/bestxu/chinese-char-replace/releases](https://gitee.com/bestxu/chinese-char-replace/releases)
+
+
+
+# instructions：
+1. install plugin.
+2. Configure the symbols you want to replace in settins.
+   `
+	settings - Tools -  ChineseCharReplace 
+	`
+3. It is better to turn off the automatic Chinese to English punctuation function in the input method.
 
 
 
