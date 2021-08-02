@@ -48,29 +48,4 @@ public class CharAutoReplaceAction {
         });
 
     }
-
-    public synchronized void  replace2(@NotNull DocumentEvent event, Editor editor,String originalText, String replacement){
-        Document document = event.getDocument();
-        Project project = editor.getProject();
-        int currentOffset = event.getOffset() + event.getNewLength();
-        Runnable replaceTask = new Runnable() {
-            @Override
-            public void run() {
-                LOG.info("input char: "+ originalText +" replaced: " + replacement);
-                document.replaceString(event.getOffset(), currentOffset, replacement);
-                HintService.getInstance().showHint((EditorImpl) editor, HintService.INSTANCE.createHint(originalText,
-                        replacement),null);
-            }
-        };
-
-        ApplicationManager.getApplication().invokeAndWait(() -> {
-            if (editor.isDisposed()) {
-                LOG.info("editor is disposed, project:"+editor.getProject().getName());
-                return;
-            }
-            WriteCommandAction.runWriteCommandAction(project, replaceTask);
-        });
-
-
-    }
 }

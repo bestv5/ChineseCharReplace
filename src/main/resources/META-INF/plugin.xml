@@ -3,10 +3,12 @@
     <name>ChineseCharReplace</name>
     <vendor email="lixr873@163.com" url="https://github.com/ranbest/ChineseCharReplace">best.xu</vendor>
     <description>
-        中文字符自动替换成英文字符插件。提高了写代码效率，再也不用担心写注释和代码忘记切换输入法了；并且能够识别注释，注释区域内不进行替换；仅支持配置的字符进行替换；
+        Chinese characters are automatically replaced by English characters plug-in. It improves the efficiency of writing code and increases the service life of the keyboard. Don't worry about writing comments and code and forgetting to switch input methods anymore.
+
+        (中文字符自动替换成英文字符插件。提高了写代码效率，增加了键盘寿命。再也不用担心写注释和代码忘记切换输入法了。)
     </description>
     <idea-version since-build="203.5981"/>
-    <depends>com.intellij.modules.platform</depends>
+    <depends>com.intellij.modules.lang</depends>
 
     <extensions defaultExtensionNs="com.intellij">
         <applicationConfigurable parentId="tools" instance="com.haojiyou.cnchar.CnCharSettingComponent"
@@ -15,4 +17,5 @@
         <typedHandler implementation="com.haojiyou.cnchar.handler.ChineseCharCheckHandler" id="com.haojiyou.cnchar.ChineseCharCheckHandler"/>
         <applicationService serviceImplementation="com.haojiyou.cnchar.service.HintService" id="hintService"/>
     </extensions>
+
 </idea-plugin>
