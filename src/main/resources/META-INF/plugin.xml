@@ -8,6 +8,8 @@
         (中文字符自动替换成英文字符插件。提高了写代码效率，增加了键盘寿命。再也不用担心写注释和代码忘记切换输入法了。)
     </description>
     <idea-version since-build="203.5981"/>
+
+    <depends>com.intellij.modules.platform</depends>
     <depends>com.intellij.modules.lang</depends>
 
     <extensions defaultExtensionNs="com.intellij">
