@@ -22,7 +22,7 @@
 
 # install
 
-  Jetbrains Plugin Marketplace : [17228-chinesecharreplacce](https://plugins.jetbrains.com/plugin/17228-chinesecharreplacce)
+  Jetbrains Plugin Marketplace : [17345-charautoreplace](https://plugins.jetbrains.com/plugin/17345-charautoreplace)
 
   Offline installation download url：
 

@@ -12,7 +12,7 @@
 
 2) **gitee**: [https://gitee.com/bestxu/chinese-char-replace](https://gitee.com/bestxu/chinese-char-replace)
 # 安装
-Jetbrains Plugin Marketplace : [17228-chinesecharreplacce](https://plugins.jetbrains.com/plugin/17228-chinesecharreplacce)
+Jetbrains Plugin Marketplace : [17345-charautoreplace](https://plugins.jetbrains.com/plugin/17345-charautoreplace)
 
 
 
