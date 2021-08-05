@@ -1,4 +1,4 @@
-# Chinese character replacemet
+# Character Auto Replacemet - Plugin
 
 # description:
  1. The plug-in automatically replaces the input Chinese punctuation without deliberately switching the input method, which greatly reduces the service life of the keyboard keys.
