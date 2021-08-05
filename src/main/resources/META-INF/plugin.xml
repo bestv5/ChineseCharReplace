@@ -1,6 +1,6 @@
 <idea-plugin>
-    <id>com.haojiyou.ChineseCharReplacce</id>
-    <name>ChineseCharReplace</name>
+    <id>com.haojiyou.CharAutoReplace</id>
+    <name>CharAutoReplace</name>
     <vendor email="lixr873@163.com" url="https://github.com/ranbest/ChineseCharReplace">best.xu</vendor>
     <description>
         Chinese characters are automatically replaced by English characters plug-in. It improves the efficiency of writing code and increases the service life of the keyboard. Don't worry about writing comments and code and forgetting to switch input methods anymore.
@@ -14,7 +14,7 @@
 
     <extensions defaultExtensionNs="com.intellij">
         <applicationConfigurable parentId="tools" instance="com.haojiyou.cnchar.CnCharSettingComponent"
-                                 id="com.haojiyou.CnCharSetting" displayName="ChineseCharReplace"
+                                 id="com.haojiyou.CharAutoReplace" displayName="CharAutoReplace"
                                  nonDefaultProject="false"/>
         <typedHandler implementation="com.haojiyou.cnchar.handler.ChineseCharCheckHandler" id="com.haojiyou.cnchar.ChineseCharCheckHandler"/>
         <applicationService serviceImplementation="com.haojiyou.cnchar.service.HintService" id="hintService"/>

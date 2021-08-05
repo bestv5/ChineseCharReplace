@@ -34,7 +34,7 @@
 1. install plugin.
 2. Configure the symbols you want to replace in settins.
    `
-	settings - Tools -  ChineseCharReplace 
+	settings - Tools -  CharAutoReplace 
 	`
 3. It is better to turn off the automatic Chinese to English punctuation function in the input method.
 

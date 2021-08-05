@@ -28,7 +28,7 @@ Jetbrains Plugin Marketplace : [17228-chinesecharreplacce](https://plugins.jetbr
 # 使用说明：
 1. 下载安装插件。
 2. 在  `
-   settings - Tools -  ChineseCharReplace
+   settings - Tools -  CharAutoReplace
    `中配置自己想替换的符号（默认配置了大部分中文标点）。
 3. 最好关闭输入法中，自动中文变英文标点功能。
 
