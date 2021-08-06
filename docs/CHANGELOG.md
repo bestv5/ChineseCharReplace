@@ -1,4 +1,7 @@
 ---
+# 1.5.0
+* remove txt|markdown file support
+
 # 1.4.0
 *  Added judgment on the end of comment line.
 
