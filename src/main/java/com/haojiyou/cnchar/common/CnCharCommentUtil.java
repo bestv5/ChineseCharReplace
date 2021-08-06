@@ -34,7 +34,6 @@ public class CnCharCommentUtil {
 
 
         COMMENT_START_MAP.put(SupportFileType.GIT_IGNORE.getType(), new String[]{"#"});
-        COMMENT_START_MAP.put(SupportFileType.MARKDOWN.getType(), new String[]{"#", "--"});
 
         COMMENT_START_MAP.put(SupportFileType.XML.getType(), new String[]{"<!--"});
         COMMENT_END_MAP.put(SupportFileType.XML.getType(), new String[]{"-->"});
@@ -62,10 +61,9 @@ public class CnCharCommentUtil {
 
     /**
      * 前提是已经判断出元素是一个注释区域，使用此方法判断是否是注释结尾外
-     * @param document
-     * @param offset
-     * @param fileType
-     * @return
+     * @param document document对象
+     * @param offset 当前光标位置
+     * @return 反回当前光标是否在注释末尾的后面
      */
     public static boolean isAfterEndOfComment(Document document,Project project,int offset){
        SupportFileType fileType = getSupportFileType(project);
@@ -88,7 +86,7 @@ public class CnCharCommentUtil {
      * @param document      文档对象
      * @param project       当前项目对象
      * @param currentOffset 当前光标位置
-     * @return
+     * @return 反回是否自定义的注释，true ：是  false ：不是
      */
     public static boolean isCustomComment(Document document, Project project, int currentOffset) {
         //当前行文本

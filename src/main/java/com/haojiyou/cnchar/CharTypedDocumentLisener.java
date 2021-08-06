@@ -2,6 +2,7 @@ package com.haojiyou.cnchar;
 
 import com.haojiyou.cnchar.action.CharAutoReplaceAction;
 import com.haojiyou.cnchar.common.CnCharCommentUtil;
+import com.haojiyou.cnchar.common.MyConst;
 import com.haojiyou.cnchar.common.ReplaceCharConfig;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.editor.Caret;
@@ -90,7 +91,7 @@ public class CharTypedDocumentLisener implements DocumentListener {
      * @param document     文档对象
      * @param editor       当前的编辑器对象
      * @param file         当前文件对象
-     * @return
+     * @return xx
      */
     private boolean isCanBeReplaced(String originalText, String replacement, Project project, Document document, Editor editor, PsiFile file) {
         if (StringUtils.isBlank(originalText)) {
@@ -108,13 +109,21 @@ public class CharTypedDocumentLisener implements DocumentListener {
         final Caret primaryCaret = caretModel.getPrimaryCaret();
         int caretOffset = primaryCaret.getOffset();
         //判断当前行是否是注释
-        PsiComment comment = null;
+        PsiComment comment;
         //当前光标元素
         PsiElement element = file.findElementAt(caretOffset);
 
         if (element == null) {
             //看自定义注释
             LOG.info("current offset element is null!");
+
+            //txt file don't replace, at the same time, it can be compatible with the git commit input window.
+            //if (StringUtils.equalsIgnoreCase("Dummy.txt", file.getName())) {
+            if (StringUtils.equalsIgnoreCase(file.getFileType().getDefaultExtension(), MyConst.TXT)) {
+                LOG.info("txt file doesn't replace!");
+                return false;
+            }
+
             if (CnCharCommentUtil.isCustomComment(document, project, caretOffset)) {
                 //是自定义注释区域，不会替换中文字符。
                 LOG.info("是自定义注释,不替换。");
@@ -136,35 +145,31 @@ public class CharTypedDocumentLisener implements DocumentListener {
                 if (comment != null) {
                     //前一个光标位置是注释元素，要判断是否是块注释末尾
                     //如果是块注释末尾，说明当前输入是注释区域外（代码区），就要替换。
-                    if (CnCharCommentUtil.isAfterEndOfComment(document, project, caretOffset)) {
-                        return true;
-                    }
-                    return false;
+                    return CnCharCommentUtil.isAfterEndOfComment(document, project, caretOffset);
                 }
             }
         }
-            if (element != null) {
-                comment = PsiTreeUtil.getParentOfType(element, PsiComment.class, false);
-            }
-
-
-            if (comment != null) {
-                //comment 不为空，就认为此处是注释区域，不会替换中文字符。
-                LOG.info("Jetbrains api 识别的注释不替换。");
-                return false;
-            }
-
-            if (CnCharCommentUtil.isCustomComment(document, project, caretOffset)) {
-                //是自定义注释区域，不会替换中文字符。
-                LOG.info("是自定义注释,不替换。");
-                return false;
-            }
-
-            if (StringUtils.equalsIgnoreCase("Dummy.txt", file.getName())) {
-                //git commit窗口输入跳过
-                LOG.info("识别出git提交编辑窗口,跳过");
-                return false;
-            }
-            return true;
+        if (element != null) {
+            comment = PsiTreeUtil.getParentOfType(element, PsiComment.class, false);
         }
+
+
+        if (comment != null) {
+            //comment 不为空，就认为此处是注释区域，不会替换中文字符。
+            LOG.info("Jetbrains api 识别的注释不替换。");
+            return false;
+        }
+
+        if (CnCharCommentUtil.isCustomComment(document, project, caretOffset)) {
+            //是自定义注释区域，不会替换中文字符。
+            LOG.info("是自定义注释,不替换。");
+            return false;
+        }
+
+        if (StringUtils.equalsIgnoreCase(file.getFileType().getDefaultExtension(), MyConst.TXT)) {
+            LOG.info("txt file doesn't replace!");
+            return false;
+        }
+        return true;
+    }
 }
