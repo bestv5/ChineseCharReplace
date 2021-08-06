@@ -3,9 +3,14 @@
     <name>CharAutoReplace</name>
     <vendor email="lixr873@163.com" url="https://github.com/ranbest/ChineseCharReplace">best.xu</vendor>
     <description>
-        Chinese characters are automatically replaced by English characters plug-in. It improves the efficiency of writing code and increases the service life of the keyboard. Don't worry about writing comments and code and forgetting to switch input methods anymore.
-
+        <![CDATA[
+        characters (as Chinese punctuation) are automatically replaced by configured English characters. It improves the efficiency of writing code and increases the service life of the keyboard. Don't worry about writing comments and code and forgetting to switch input methods anymore.
+        <br/>
         (中文字符自动替换成英文字符插件。提高了写代码效率，增加了键盘寿命。再也不用担心写注释和代码忘记切换输入法了。)
+        ]]>
+
+
+
     </description>
     <idea-version since-build="203.5981"/>
 
