@@ -1,4 +1,7 @@
 ---
+# 1.5.0
+* add show replaced hint config 
+  (settings - Tools - CharAutoReplace).
 # 1.4.0
 * Added judgment on the end of comment line.
 * remove txt|markdown file support

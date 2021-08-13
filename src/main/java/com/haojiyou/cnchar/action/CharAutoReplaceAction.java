@@ -1,5 +1,6 @@
 package com.haojiyou.cnchar.action;
 
+import com.haojiyou.cnchar.common.ReplaceCharConfig;
 import com.haojiyou.cnchar.service.HintService;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.command.WriteCommandAction;
@@ -36,11 +37,10 @@ public class CharAutoReplaceAction {
                 LOG.info("editor is disposed, project:"+editor.getProject().getName());
                 return;
             }
-            WriteCommandAction.runWriteCommandAction(project, new Runnable() {
-                @Override
-                public void run() {
-                    document.replaceString(event.getOffset(), currentOffset, replacement);
-                    LOG.info("input char: "+ originalText +" replaced: " + replacement);
+            WriteCommandAction.runWriteCommandAction(project, () -> {
+                document.replaceString(event.getOffset(), currentOffset, replacement);
+                LOG.info("input char: "+ originalText +" replaced: " + replacement);
+                if (ReplaceCharConfig.showRepacedMsg){
                     HintService.getInstance().showHint((EditorImpl) editor, HintService.INSTANCE.createHint(originalText,
                             replacement),null);
                 }

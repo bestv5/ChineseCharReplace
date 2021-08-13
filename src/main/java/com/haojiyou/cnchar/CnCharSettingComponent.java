@@ -3,6 +3,8 @@ package com.haojiyou.cnchar;
 import com.haojiyou.cnchar.common.ReplaceCharConfig;
 import com.intellij.ide.util.PropertiesComponent;
 import com.intellij.openapi.options.Configurable;
+import com.intellij.ui.JBColor;
+import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
@@ -12,14 +14,17 @@ import java.awt.event.MouseListener;
 
 public class CnCharSettingComponent implements Configurable {
     public static final int LENGTH = 45;
-    public static final String DEFAULT_STRING = "， , 。 . ： : ； ; ！ ! ？ ? “ \" ” \" ‘ ' ’ ' 【 [ 】 ] （ ( ） ) 「 { 」 } 《 < 》 >".replace(" ", "\n");
+    public static final String DEFAULT_STRING = "， , 。 . ： : ； ; ！ ! ？ ? “ \" ” \" ‘ ' ’ ' 【 [ 】 ] （ ( ） ) 「 { 」 } 《 < 》 > 、 /".replace(" ",
+            "\n");
     public static final String KEY = "cnchar_config_string";
+    public static final String REPLACED_MSG_SHOW_KEY = "cnchar_config_replace_msg_hit";
     private JPanel settingPanel;
     private JTextField[] text1;
     private JTextField[] text2;
     private JLabel[] labels1;
     private JLabel[] labels2;
     private JLabel btnDefault;
+    private JCheckBox isReplaceMsgHit;
 
     public static void main(String[] args) {
         String[] a = DEFAULT_STRING.split("\n");
@@ -28,22 +33,23 @@ public class CnCharSettingComponent implements Configurable {
         }
     }
 
+
     @Override
     public String getDisplayName() {
-        return "ChineseCharReplacce";
+        return "CharAutoReplace";
     }
 
     @Override
     @Nullable
     public String getHelpTopic() {
-        return "chinese char auto replace";
+        return "char auto replace";
     }
 
 
     @Override
     @Nullable
     public JComponent createComponent() {
-        if (settingPanel != null) {
+        if (settingPanel != null ) {
             settingPanel.repaint();
             return settingPanel;
         }
@@ -74,10 +80,17 @@ public class CnCharSettingComponent implements Configurable {
             settingPanel.add(labels2[i]);
         }
 
+        isReplaceMsgHit = new JCheckBox("启用替换提示");
+        isReplaceMsgHit.setText("启用替换提示");
+        isReplaceMsgHit.setBounds(30, 32 * 15, 200, 32);
+        isReplaceMsgHit.setSelected(ReplaceCharConfig.showRepacedMsg);
+
+        settingPanel.add(isReplaceMsgHit);
+
         btnDefault = new JLabel();
         btnDefault.setText("恢复默认");
-        btnDefault.setForeground(Color.BLUE);
-        btnDefault.setBounds(30, 32 * 15, 60, 32);
+        btnDefault.setForeground(JBColor.BLUE);
+        btnDefault.setBounds(30, 34 * 15, 60, 32);
         btnDefault.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         btnDefault.addMouseListener(new MouseListener() {
             @Override
@@ -85,6 +98,7 @@ public class CnCharSettingComponent implements Configurable {
                 int response = JOptionPane.showConfirmDialog(settingPanel,"确定恢复默认吗？",getDisplayName(), JOptionPane.YES_NO_OPTION);
                 if (response == 0) {
                     PropertiesComponent.getInstance().setValue(KEY, DEFAULT_STRING);
+                    PropertiesComponent.getInstance().setValue(REPLACED_MSG_SHOW_KEY, false);
                     ReplaceCharConfig.reload();
                     reset();
                 }
@@ -111,6 +125,7 @@ public class CnCharSettingComponent implements Configurable {
             }
         });
         settingPanel.add(btnDefault);
+
         return settingPanel;
     }
 
@@ -119,13 +134,22 @@ public class CnCharSettingComponent implements Configurable {
     public boolean isModified() {
         String oldStr = PropertiesComponent.getInstance().getValue(KEY, DEFAULT_STRING).trim();
         String newStr = getConfigString().trim();
-        return !newStr.equals(oldStr);
+        String replaceMsgShowOldValue = PropertiesComponent.getInstance().getValue(REPLACED_MSG_SHOW_KEY);
+        boolean replaceMsgShowConfigValue = isReplaceMsgHit.isSelected();
+        if (StringUtils.isBlank(replaceMsgShowOldValue)){
+            return replaceMsgShowConfigValue || !newStr.equals(oldStr);
+        }else {
+            return !newStr.equals(oldStr) || (Boolean.parseBoolean(replaceMsgShowOldValue) != replaceMsgShowConfigValue);
+        }
+
     }
     @Override
     //用户点击“OK”或“Apply”按钮后会调用该方法，通常用于完成配置信息持久化。
     public void apply() {
         String str = getConfigString();
+        boolean replaceMsgShowConfigValue = isReplaceMsgHit.isSelected();
         PropertiesComponent.getInstance().setValue(KEY, str);
+        PropertiesComponent.getInstance().setValue(REPLACED_MSG_SHOW_KEY, replaceMsgShowConfigValue);
         ReplaceCharConfig.reload();
     }
     @Override
@@ -137,6 +161,7 @@ public class CnCharSettingComponent implements Configurable {
             text1[i].setText((2 * i) < configString.length ? configString[2 * i].trim() : "");
             text2[i].setText((2 * i + 1) < configString.length ? configString[2 * i + 1].trim() : "");
         }
+
     }
 
     private String getConfigString() {
@@ -146,5 +171,6 @@ public class CnCharSettingComponent implements Configurable {
         }
         return sb.toString().trim();
     }
+
 
 }

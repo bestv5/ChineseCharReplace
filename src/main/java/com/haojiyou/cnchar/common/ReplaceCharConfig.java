@@ -16,6 +16,7 @@ public class ReplaceCharConfig {
      * 缓存替换中英文字符配置
      */
     public static Map<String, String> cnCharMap = new HashMap<>();
+    public static boolean showRepacedMsg = false;
 
     static {
         reload();
@@ -27,5 +28,6 @@ public class ReplaceCharConfig {
         for (int i = 0; i < configString.length / 2; i++) {
             cnCharMap.put(configString[2 * i].trim(), configString[2 * i + 1].trim());
         }
+        showRepacedMsg = Boolean.parseBoolean(PropertiesComponent.getInstance().getValue(CnCharSettingComponent.REPLACED_MSG_SHOW_KEY, "false"));
     }
 }
