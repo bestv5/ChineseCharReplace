@@ -22,7 +22,7 @@ dependencies {
 }
 
 group 'com.haojiyou'
-version '1.5.0'
+version '1.6.0'
 
 apply plugin: 'org.kordamp.gradle.markdown'
 apply plugin: 'java'

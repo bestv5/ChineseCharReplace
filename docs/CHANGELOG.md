@@ -1,7 +1,13 @@
 ---
+# 1.6.0
+* add auto replace in comment area  config
+  (default config will not be replaced in comment).  
+  (settings - Tools - CharAutoReplace).
+
 # 1.5.0
 * add show replaced hint config 
   (settings - Tools - CharAutoReplace).
+
 # 1.4.0
 * Added judgment on the end of comment line.
 * remove txt|markdown file support

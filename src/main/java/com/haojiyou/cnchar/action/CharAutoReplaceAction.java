@@ -40,6 +40,7 @@ public class CharAutoReplaceAction {
             WriteCommandAction.runWriteCommandAction(project, () -> {
                 document.replaceString(event.getOffset(), currentOffset, replacement);
                 LOG.info("input char: "+ originalText +" replaced: " + replacement);
+                LOG.info("replace msg hint config:" + ReplaceCharConfig.showRepacedMsg);
                 if (ReplaceCharConfig.showRepacedMsg){
                     HintService.getInstance().showHint((EditorImpl) editor, HintService.INSTANCE.createHint(originalText,
                             replacement),null);

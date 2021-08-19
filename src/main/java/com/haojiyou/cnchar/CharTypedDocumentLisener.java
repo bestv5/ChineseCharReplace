@@ -126,15 +126,14 @@ public class CharTypedDocumentLisener implements DocumentListener {
 
             if (CnCharCommentUtil.isCustomComment(document, project, caretOffset)) {
                 //是自定义注释区域，不会替换中文字符。
-                LOG.info("是自定义注释,不替换。");
-                return false;
+                LOG.info("是自定义注释,是否要替换?:" + ReplaceCharConfig.replaceInComment);
+                return ReplaceCharConfig.replaceInComment;
             }
             return true;
         }
         comment = PsiTreeUtil.getParentOfType(element, PsiComment.class, false);
-        if (comment != null) {
-            // 是注释区域,不替换
-            return false;
+        if (comment != null ) {
+            return ReplaceCharConfig.replaceInComment;
         }
 
         if (element instanceof PsiWhiteSpace) {
@@ -143,6 +142,10 @@ public class CharTypedDocumentLisener implements DocumentListener {
                 element = file.findElementAt(caretOffset - 1);
                 comment = PsiTreeUtil.getParentOfType(element, PsiComment.class, false);
                 if (comment != null) {
+                    //如果开启了注释区域也要替换，就不用判断是否注释尾了
+                    if (ReplaceCharConfig.replaceInComment){
+                        return true;
+                    }
                     //前一个光标位置是注释元素，要判断是否是块注释末尾
                     //如果是块注释末尾，说明当前输入是注释区域外（代码区），就要替换。
                     return CnCharCommentUtil.isAfterEndOfComment(document, project, caretOffset);
@@ -157,7 +160,7 @@ public class CharTypedDocumentLisener implements DocumentListener {
         if (comment != null) {
             //comment 不为空，就认为此处是注释区域，不会替换中文字符。
             LOG.info("Jetbrains api 识别的注释不替换。");
-            return false;
+            return ReplaceCharConfig.replaceInComment;
         }
 
         if (CnCharCommentUtil.isCustomComment(document, project, caretOffset)) {

@@ -25,7 +25,8 @@ public class HintService {
 
     public static final HintService INSTANCE = new HintService();
 
-    private static String TIPS = "<html><div>\n<div>\n  <span style=\"color: #777777; font-size: 1em;\">AutoFix:</span>&nbsp;\n<br>  CONTENT\n</div>\n<a href=\"#\" style=\"color: #2470b3; font-size: 0.9em; cursor: pointer;\">TIPS</a>\n</div></html>";
+    private static String TIPS = "<html><div>\n<div>\n  <span style=\"color: #777777; font-size: 1em;\">AutoFix:</span>&nbsp;&nbsp;" +
+            "CONTENT\n</div>\n<label  style=\"color: #2470b3; font-size: 0.9em; \">TIPS</label>\n</div></html>";
 
 public static HintService getInstance(){
     return ApplicationManager.getApplication().getService(HintService.class);
@@ -63,9 +64,9 @@ public static HintService getInstance(){
     public String createHint(String original, String replacement) {
         original = originalHtml(StringEscapeUtils.escapeHtml(original));
         replacement = replacement(StringEscapeUtils.escapeHtml(replacement));
-        String title = "字符自动替换?";
+        String title = "提示: ";
         String content = original + "已被改为" + replacement;
-        String apply = "如果不需要替换，请按撤回键还原.";
+        String apply = "如果不需要替换，请按[撤回]的快捷键还原.";
         return TIPS.replace("AutoFix:", title)
                 .replace("CONTENT", "<span style=\"color: #777777; font-size: 1em;\">" + content + "</span>\n").replace("TIPS", apply);
     }

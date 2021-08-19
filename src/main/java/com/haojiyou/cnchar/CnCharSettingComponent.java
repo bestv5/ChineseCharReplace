@@ -18,6 +18,8 @@ public class CnCharSettingComponent implements Configurable {
             "\n");
     public static final String KEY = "cnchar_config_string";
     public static final String REPLACED_MSG_SHOW_KEY = "cnchar_config_replace_msg_hit";
+    public static final String REPLACED_IN_COMMENT_KEY = "cnchar_config_replace_in_comment";
+
     private JPanel settingPanel;
     private JTextField[] text1;
     private JTextField[] text2;
@@ -25,6 +27,7 @@ public class CnCharSettingComponent implements Configurable {
     private JLabel[] labels2;
     private JLabel btnDefault;
     private JCheckBox isReplaceMsgHit;
+    private JCheckBox replaceInCommentCheckBox;
 
     public static void main(String[] args) {
         String[] a = DEFAULT_STRING.split("\n");
@@ -84,13 +87,19 @@ public class CnCharSettingComponent implements Configurable {
         isReplaceMsgHit.setText("启用替换提示");
         isReplaceMsgHit.setBounds(30, 32 * 15, 200, 32);
         isReplaceMsgHit.setSelected(ReplaceCharConfig.showRepacedMsg);
-
         settingPanel.add(isReplaceMsgHit);
+
+        replaceInCommentCheckBox = new JCheckBox("启用注释内替换");
+        replaceInCommentCheckBox.setText("启用注释内替换");
+        replaceInCommentCheckBox.setBounds(30, 34 * 15, 250, 32);
+        replaceInCommentCheckBox.setSelected(ReplaceCharConfig.replaceInComment);
+        settingPanel.add(replaceInCommentCheckBox);
+
 
         btnDefault = new JLabel();
         btnDefault.setText("恢复默认");
         btnDefault.setForeground(JBColor.BLUE);
-        btnDefault.setBounds(30, 34 * 15, 60, 32);
+        btnDefault.setBounds(30, 36 * 15, 60, 32);
         btnDefault.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         btnDefault.addMouseListener(new MouseListener() {
             @Override
@@ -136,11 +145,22 @@ public class CnCharSettingComponent implements Configurable {
         String newStr = getConfigString().trim();
         String replaceMsgShowOldValue = PropertiesComponent.getInstance().getValue(REPLACED_MSG_SHOW_KEY);
         boolean replaceMsgShowConfigValue = isReplaceMsgHit.isSelected();
-        if (StringUtils.isBlank(replaceMsgShowOldValue)){
-            return replaceMsgShowConfigValue || !newStr.equals(oldStr);
-        }else {
-            return !newStr.equals(oldStr) || (Boolean.parseBoolean(replaceMsgShowOldValue) != replaceMsgShowConfigValue);
+
+        String configedReplaceInCommentOldValue = PropertiesComponent.getInstance().getValue(REPLACED_IN_COMMENT_KEY);
+        boolean configedReplaceInCommentValue = replaceInCommentCheckBox.isSelected();
+
+        if (StringUtils.isBlank(replaceMsgShowOldValue) && replaceMsgShowConfigValue){
+            return true;
+        }else if ((Boolean.parseBoolean(replaceMsgShowOldValue) != replaceMsgShowConfigValue)){
+            return true;
         }
+
+        if (StringUtils.isBlank(configedReplaceInCommentOldValue) && configedReplaceInCommentValue){
+            return true;
+        }else if (Boolean.parseBoolean(configedReplaceInCommentOldValue) != configedReplaceInCommentValue){
+            return true;
+        }
+        return !newStr.equals(oldStr);
 
     }
     @Override
@@ -148,8 +168,11 @@ public class CnCharSettingComponent implements Configurable {
     public void apply() {
         String str = getConfigString();
         boolean replaceMsgShowConfigValue = isReplaceMsgHit.isSelected();
+        boolean configedReplaceInCommentValue = replaceInCommentCheckBox.isSelected();
+
         PropertiesComponent.getInstance().setValue(KEY, str);
         PropertiesComponent.getInstance().setValue(REPLACED_MSG_SHOW_KEY, replaceMsgShowConfigValue);
+        PropertiesComponent.getInstance().setValue(REPLACED_IN_COMMENT_KEY, configedReplaceInCommentValue);
         ReplaceCharConfig.reload();
     }
     @Override
