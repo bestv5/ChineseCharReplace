@@ -1,4 +1,7 @@
 ---
+# 1.6.1
+* 移除过时的api
+
 # 1.6.0
 * add auto replace in comment area  config
   (default config will not be replaced in comment).  

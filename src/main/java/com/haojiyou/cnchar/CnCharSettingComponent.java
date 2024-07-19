@@ -13,7 +13,8 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 
 public class CnCharSettingComponent implements Configurable {
-    public static final int LENGTH = 45;
+    public static final int LENGTH = 30;
+    public static final int ROW = 10;
     public static final String DEFAULT_STRING = "， , 。 . ： : ； ; ！ ! ？ ? “ \" ” \" ‘ ' ’ ' 【 [ 】 ] （ ( ） ) 「 { 」 } 《 < 》 > 、 /".replace(" ",
             "\n");
     public static final String KEY = "cnchar_config_string";
@@ -28,6 +29,8 @@ public class CnCharSettingComponent implements Configurable {
     private JLabel btnDefault;
     private JCheckBox isReplaceMsgHit;
     private JCheckBox replaceInCommentCheckBox;
+
+    private JTextArea extensionWhitelist;
 
     public static void main(String[] args) {
         String[] a = DEFAULT_STRING.split("\n");
@@ -56,6 +59,7 @@ public class CnCharSettingComponent implements Configurable {
             settingPanel.repaint();
             return settingPanel;
         }
+
         settingPanel = new JPanel();
         settingPanel.setLayout(null);
         text1 = new JTextField[LENGTH];
@@ -67,10 +71,10 @@ public class CnCharSettingComponent implements Configurable {
             text2[i] = new JTextField();
             labels1[i] = new JLabel();
             labels2[i] = new JLabel();
-            text1[i].setBounds(35 + (i / 15) * 200, 32 * (i % 15), 60, 32);
-            text2[i].setBounds(120 + (i / 15) * 200, 32 * (i % 15), 60, 32);
-            labels1[i].setBounds(5 + (i / 15) * 200, 32 * (i % 15), 30, 32);
-            labels2[i].setBounds(95 + (i / 15) * 200, 32 * (i % 15), 25, 32);
+            text1[i].setBounds(35 + (i / ROW) * 200, 32 * (i % ROW), 60, 32);
+            text2[i].setBounds(120 + (i / ROW) * 200, 32 * (i % ROW), 60, 32);
+            labels1[i].setBounds(5 + (i / ROW) * 200, 32 * (i % ROW), 30, 32);
+            labels2[i].setBounds(95 + (i / ROW) * 200, 32 * (i % ROW), 25, 32);
             labels1[i].setText((i + 1) + ".");
             labels2[i].setText("->");
             labels1[i].setHorizontalAlignment(JLabel.CENTER);
@@ -94,7 +98,16 @@ public class CnCharSettingComponent implements Configurable {
         replaceInCommentCheckBox.setBounds(30, 34 * 15, 250, 32);
         replaceInCommentCheckBox.setSelected(ReplaceCharConfig.replaceInComment);
         settingPanel.add(replaceInCommentCheckBox);
-
+        //JLabel text = new JLabel();
+        //text.setText("不进行替换的文件扩展名配置。格式:.java");
+        //text.setForeground(JBColor.BLUE);
+        //text.setBounds(30, 36 * 15, 60, 32);
+        ////替换白名单
+        //extensionWhitelist = new JTextArea();
+        //extensionWhitelist.setEditable(true);
+        //extensionWhitelist.setText("fsfs");
+        //extensionWhitelist.setBounds(30, 25*15, 250,32);
+        //settingPanel.add(extensionWhitelist);
 
         btnDefault = new JLabel();
         btnDefault.setText("恢复默认");

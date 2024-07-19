@@ -10,7 +10,7 @@ import com.intellij.openapi.editor.VisualPosition;
 import com.intellij.openapi.editor.impl.EditorImpl;
 import com.intellij.ui.LightweightHint;
 import com.intellij.util.ui.accessibility.AccessibleContextUtil;
-import org.apache.commons.lang.StringEscapeUtils;
+import org.apache.commons.text.StringEscapeUtils;
 
 import javax.swing.*;
 import javax.swing.event.HyperlinkListener;
@@ -62,8 +62,8 @@ public static HintService getInstance(){
 
 
     public String createHint(String original, String replacement) {
-        original = originalHtml(StringEscapeUtils.escapeHtml(original));
-        replacement = replacement(StringEscapeUtils.escapeHtml(replacement));
+        original = originalHtml(StringEscapeUtils.escapeHtml4(original));
+        replacement = replacement(StringEscapeUtils.escapeHtml4(replacement));
         String title = "提示: ";
         String content = original + "已被改为" + replacement;
         String apply = "如果不需要替换，请按[撤回]的快捷键还原.";
