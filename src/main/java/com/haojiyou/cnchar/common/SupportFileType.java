@@ -18,6 +18,13 @@ public enum SupportFileType {
     HTML("html"),
     //js文件
     JS("js"),
+    //c++文件
+    CPP("cpp"),
+    //c文件
+    H("h"),
+    TS("ts"),
+    //typescript 文件
+    TSX("tsx"),
     //config file
     PROPERTIES("properties"),
     //git 忽略文件

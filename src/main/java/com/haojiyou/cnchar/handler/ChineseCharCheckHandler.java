@@ -20,7 +20,7 @@ public class ChineseCharCheckHandler extends TypedHandlerDelegate {
 
     @Override
     public @NotNull Result beforeCharTyped(char c, @NotNull Project project, @NotNull Editor editor, @NotNull PsiFile file, @NotNull FileType fileType) {
-        LOG.info("your inputed char :" + c);
+        LOG.info("handler input char: "+ c);
         if (StringUtils.isNotBlank(String.valueOf(c))) {
             LOG.info("add DocumentListener...CharTypedDocumentLisener");
             editor.getDocument().addDocumentListener(new CharTypedDocumentLisener(editor, file));

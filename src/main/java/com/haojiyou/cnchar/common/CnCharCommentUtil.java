@@ -29,6 +29,19 @@ public class CnCharCommentUtil {
         COMMENT_START_MAP.put(SupportFileType.JS.getType(), new String[]{"//", "/*"});
         COMMENT_END_MAP.put(SupportFileType.JS.getType(), new String[]{"*/"});
 
+        COMMENT_START_MAP.put(SupportFileType.TS.getType(), new String[]{"//", "/*"});
+        COMMENT_END_MAP.put(SupportFileType.TS.getType(), new String[]{"*/"});
+
+        COMMENT_START_MAP.put(SupportFileType.TSX.getType(), new String[]{"//", "/*"});
+        COMMENT_END_MAP.put(SupportFileType.TSX.getType(), new String[]{"*/"});
+
+        COMMENT_START_MAP.put(SupportFileType.CPP.getType(), new String[]{"//", "/*"});
+        COMMENT_END_MAP.put(SupportFileType.CPP.getType(), new String[]{"*/"});
+
+        COMMENT_START_MAP.put(SupportFileType.H.getType(), new String[]{"//", "/*"});
+        COMMENT_END_MAP.put(SupportFileType.H.getType(), new String[]{"*/"});
+
+
         COMMENT_START_MAP.put(SupportFileType.SQL.getType(), new String[]{"--", "/*"});
         COMMENT_END_MAP.put(SupportFileType.SQL.getType(), new String[]{"*/"});
 

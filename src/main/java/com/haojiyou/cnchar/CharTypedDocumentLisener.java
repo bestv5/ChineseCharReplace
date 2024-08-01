@@ -51,12 +51,17 @@ public class CharTypedDocumentLisener implements DocumentListener {
 
     public void documentChanged(@NotNull DocumentEvent event, Editor editor) {
         if (myEditor == null) {
-            LOG.info("editor is null");
+            if(LOG.isDebugEnabled()){
+                LOG.info("editor is null");
+            }
             return;
         }
         if (event.getNewLength() > 5 || !(myEditor instanceof EditorImpl)) {
             //输入长度大于5，不处理
-            LOG.info("input char length > 5");
+            if(LOG.isDebugEnabled()){
+                LOG.debug("length of the char > 5, do not replace");
+            }
+
             return;
         }
 
@@ -65,8 +70,6 @@ public class CharTypedDocumentLisener implements DocumentListener {
         if (isCanBeReplaced(originalText, replacement, editor.getProject(), editor.getDocument(), editor, this.myFile)) {
             CharAutoReplaceAction.INSTANCE.replace(event, editor, originalText, replacement);
         }
-
-
         event.getDocument().removeDocumentListener(CharTypedDocumentLisener.this);
 
     }
