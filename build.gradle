@@ -1,5 +1,8 @@
+import org.jetbrains.changelog.Changelog
+
 buildscript {
     repositories {
+        mavenLocal()
         mavenCentral()
         gradlePluginPortal()
     }
@@ -9,15 +12,16 @@ buildscript {
 plugins {
     id 'java'
     id 'org.jetbrains.intellij' version '1.1.2'
-    id 'org.kordamp.gradle.markdown' version '2.2.0'
+    id 'org.jetbrains.changelog' version '2.4.0'
 }
 
 repositories {
-    mavenCentral()
+        mavenLocal()
+        maven { name "Alibaba" ; url "https://maven.aliyun.com/repository/public" }
+        mavenCentral()
 }
 
 dependencies {
-    implementation 'org.apache.commons:commons-text:1.12.0'
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.7.2'
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.7.2'
 }
@@ -25,15 +29,24 @@ dependencies {
 group 'com.haojiyou'
 version '1.7.0'
 
-apply plugin: 'org.kordamp.gradle.markdown'
+// 统一 javac 源码编码为 UTF-8，避免中文 Windows 回退 GBK 导致“不可映射字符”编译错误
+tasks.withType(JavaCompile) {
+    options.encoding = 'UTF-8'
+}
+
 apply plugin: 'java'
 
 sourceCompatibility = JavaVersion.VERSION_11
 targetCompatibility = JavaVersion.VERSION_11
 
-markdownToHtml {
-    sourceDir  = new File("$projectDir/docs")
-    outputDir  = new File("$projectDir/docs")
+// gradle-changelog-plugin 扩展配置
+changelog {
+    version = project.version.toString()
+    path = file("$projectDir/docs/CHANGELOG.md").canonicalPath
+    groups = ["Added", "Changed", "Deprecated", "Removed", "Fixed", "Security"]
+    keepUnreleasedSection = true
+    unreleasedTerm = "[Unreleased]"
+    itemPrefix = "-"
 }
 
 intellij {
@@ -46,7 +59,12 @@ intellij {
     targetCompatibility = JavaVersion.VERSION_11
 
     patchPluginXml {
-        changeNotes = file("$projectDir/docs/CHANGELOG.html").text
+        // changeNotes 为 lazy Property<String>（javap 确认），用 provider 惰性求值
+        changeNotes = provider {
+            changelog.renderItem(
+                changelog.getUnreleased().withHeader(false).withEmptySections(false),
+                Changelog.OutputType.HTML)
+        }
     }
 
     buildSearchableOptions {

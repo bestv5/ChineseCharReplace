@@ -10,7 +10,6 @@ import com.intellij.openapi.editor.VisualPosition;
 import com.intellij.openapi.editor.impl.EditorImpl;
 import com.intellij.ui.LightweightHint;
 import com.intellij.util.ui.accessibility.AccessibleContextUtil;
-import org.apache.commons.text.StringEscapeUtils;
 
 import javax.swing.*;
 import javax.swing.event.HyperlinkListener;
@@ -62,13 +61,50 @@ public static HintService getInstance(){
 
 
     public String createHint(String original, String replacement) {
-        original = originalHtml(StringEscapeUtils.escapeHtml4(original));
-        replacement = replacement(StringEscapeUtils.escapeHtml4(replacement));
+        original = originalHtml(escapeHtml(original));
+        replacement = replacement(escapeHtml(replacement));
         String title = "提示: ";
         String content = original + "已被改为" + replacement;
         String apply = "如果不需要替换，请按[撤回]的快捷键还原.";
         return TIPS.replace("AutoFix:", title)
                 .replace("CONTENT", "<span style=\"color: #777777; font-size: 1em;\">" + content + "</span>\n").replace("TIPS", apply);
+    }
+
+    /**
+     * 使用纯 JDK 实现 HTML 转义，避免依赖 commons-text（平台运行时不自带该库）。
+     * 注意 '&' 必须最先处理，避免对已生成的实体进行二次转义。
+     *
+     * @param s 原始字符串，允许为 null
+     * @return 转义后的字符串；入参为 null 时返回空字符串
+     */
+    private static String escapeHtml(String s) {
+        if (s == null) {
+            return "";
+        }
+        StringBuilder sb = new StringBuilder(s.length() + 16);
+        for (int i = 0; i < s.length(); i++) {
+            char c = s.charAt(i);
+            switch (c) {
+                case '&':
+                    sb.append("&amp;");
+                    break;
+                case '<':
+                    sb.append("&lt;");
+                    break;
+                case '>':
+                    sb.append("&gt;");
+                    break;
+                case '"':
+                    sb.append("&quot;");
+                    break;
+                case '\'':
+                    sb.append("&#39;");
+                    break;
+                default:
+                    sb.append(c);
+            }
+        }
+        return sb.toString();
     }
 
     private String originalHtml(String s) {
