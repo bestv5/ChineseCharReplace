@@ -18,7 +18,7 @@
     <depends>com.intellij.modules.lang</depends>
 
     <extensions defaultExtensionNs="com.intellij">
-        <applicationConfigurable parentId="tools" instance="com.haojiyou.cnchar.CnCharSettingComponent"
+        <applicationConfigurable parentId="tools" instance="com.haojiyou.cnchar.settings.CharAutoReplaceConfigurable"
                                  id="com.haojiyou.CharAutoReplace" displayName="CharAutoReplace"
                                  nonDefaultProject="false"/>
         <typedHandler implementation="com.haojiyou.cnchar.handler.ChineseCharCheckHandler" id="com.haojiyou.cnchar.ChineseCharCheckHandler"/>
