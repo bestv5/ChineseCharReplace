@@ -4,6 +4,7 @@ import com.haojiyou.cnchar.action.CharAutoReplaceAction;
 import com.haojiyou.cnchar.common.CnCharCommentUtil;
 import com.haojiyou.cnchar.common.MyConst;
 import com.haojiyou.cnchar.common.ReplaceCharConfig;
+import com.haojiyou.cnchar.common.StrUtil;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.editor.Caret;
 import com.intellij.openapi.editor.CaretModel;
@@ -122,7 +123,7 @@ public class CharTypedDocumentLisener implements DocumentListener {
 
             //txt file don't replace, at the same time, it can be compatible with the git commit input window.
             //if (StringUtils.equalsIgnoreCase("Dummy.txt", file.getName())) {
-            if (StringUtils.equalsIgnoreCase(file.getFileType().getDefaultExtension(), MyConst.TXT)) {
+            if (StrUtil.equalsIgnoreCase(file.getFileType().getDefaultExtension(), MyConst.TXT)) {
                 LOG.info("txt file doesn't replace!");
                 return false;
             }
@@ -172,7 +173,7 @@ public class CharTypedDocumentLisener implements DocumentListener {
             return false;
         }
 
-        if (StringUtils.equalsIgnoreCase(file.getFileType().getDefaultExtension(), MyConst.TXT)) {
+        if (StrUtil.equalsIgnoreCase(file.getFileType().getDefaultExtension(), MyConst.TXT)) {
             LOG.info("txt file doesn't replace!");
             return false;
         }

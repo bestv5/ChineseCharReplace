@@ -1,7 +1,5 @@
 package com.haojiyou.cnchar.common;
 
-import org.apache.commons.lang3.StringUtils;
-
 /**
  * 描述: 支持的文件类型
  *
@@ -45,7 +43,7 @@ public enum SupportFileType {
         }
 
         for (SupportFileType type : SupportFileType.values()) {
-            if (StringUtils.equalsIgnoreCase(fileExtension, type.type)) {
+            if (StrUtil.equalsIgnoreCase(fileExtension, type.type)) {
                 return type;
             }
         }

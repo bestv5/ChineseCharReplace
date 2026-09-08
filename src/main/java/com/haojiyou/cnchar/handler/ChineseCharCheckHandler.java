@@ -23,7 +23,7 @@ public class ChineseCharCheckHandler extends TypedHandlerDelegate {
         LOG.info("handler input char: "+ c);
         if (StringUtils.isNotBlank(String.valueOf(c))) {
             LOG.info("add DocumentListener...CharTypedDocumentLisener");
-            editor.getDocument().addDocumentListener(new CharTypedDocumentLisener(editor, file));
+            editor.getDocument().addDocumentListener(new CharTypedDocumentLisener(editor, file), project);
         }
         return Result.CONTINUE;
     }

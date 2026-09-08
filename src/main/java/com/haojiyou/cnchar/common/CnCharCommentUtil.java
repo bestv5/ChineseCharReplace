@@ -64,9 +64,9 @@ public class CnCharCommentUtil {
         String[] commentEndFlags = COMMENT_END_MAP.get(fileType.getType());
         boolean isComment = false;
         if (commentStartFlags != null) {
-            isComment = StringUtils.endsWithAny(StringUtils.trim(line), commentEndFlags);
+            isComment = StrUtil.endsWithAny(StringUtils.trim(line), commentEndFlags);
             if (!isComment) {
-                isComment = StringUtils.startsWithAny(StringUtils.trim(line), commentStartFlags);
+                isComment = StrUtil.startsWithAny(StringUtils.trim(line), commentStartFlags);
             }
         }
         return isComment;
@@ -88,7 +88,7 @@ public class CnCharCommentUtil {
 
         String[] commentEndFlags = COMMENT_END_MAP.get(fileType.getType());
         if (commentEndFlags!=null){
-            return StringUtils.containsAny(StringUtils.trim(lineText), commentEndFlags);
+            return StrUtil.containsAny(StringUtils.trim(lineText), commentEndFlags);
         }
         return false;
     }
