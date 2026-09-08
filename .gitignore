@@ -28,3 +28,4 @@ out
 /build
 .gradle
 gradle
+gradle.properties

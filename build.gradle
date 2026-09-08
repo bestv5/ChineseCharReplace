@@ -27,7 +27,7 @@ dependencies {
 }
 
 group 'com.haojiyou'
-version '1.7.0'
+version '1.7.1'
 
 // 统一 javac 源码编码为 UTF-8，避免中文 Windows 回退 GBK 导致“不可映射字符”编译错误
 tasks.withType(JavaCompile) {
@@ -53,12 +53,15 @@ intellij {
 //    version = 'IC-2021.1.3'
     version = 'IC-2020.3'
     pluginName = 'CharAutoReplace'
-    updateSinceUntilBuild = true
+    // 关闭自动推导，避免 patchPluginXml 依据 IC-2020.3 写入 until-build=203.*
+    updateSinceUntilBuild = false
 
     sourceCompatibility = JavaVersion.VERSION_11
     targetCompatibility = JavaVersion.VERSION_11
 
     patchPluginXml {
+        // 只固定 since-build，不设置 untilBuild，产物 <idea-version> 将不含 until-build（即无兼容上限）
+        sinceBuild = '203'
         // changeNotes 为 lazy Property<String>（javap 确认），用 provider 惰性求值
         changeNotes = provider {
             changelog.renderItem(
