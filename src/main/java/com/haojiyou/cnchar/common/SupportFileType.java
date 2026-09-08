@@ -16,10 +16,32 @@ public enum SupportFileType {
     HTML("html"),
     //js文件
     JS("js"),
-    //c++文件
+    //c++源文件（.cpp）
     CPP("cpp"),
-    //c文件
+    //c++源文件（.cc）
+    CC("cc"),
+    //c++源文件（.cxx）
+    CXX("cxx"),
+    //c++源文件（.c++）
+    CPLUSPLUS("c++"),
+    //c源文件（.c）
+    C("c"),
+    //头文件（既可能是c头文件，也可能是c++头文件）
     H("h"),
+    //c++头文件（.hpp）
+    HPP("hpp"),
+    //c++头文件（.hh）
+    HH("hh"),
+    //c++头文件（.hxx）
+    HXX("hxx"),
+    //c++头文件（.h++）
+    HPLUSPLUS("h++"),
+    //c++模板实现文件（.tpp）
+    TPP("tpp"),
+    //c++内联实现文件（.inl）
+    INL("inl"),
+    //c++内联实现文件（.ipp）
+    IPP("ipp"),
     TS("ts"),
     //typescript 文件
     TSX("tsx"),

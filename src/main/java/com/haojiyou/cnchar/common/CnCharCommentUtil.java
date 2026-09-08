@@ -38,8 +38,41 @@ public class CnCharCommentUtil {
         COMMENT_START_MAP.put(SupportFileType.CPP.getType(), new String[]{"//", "/*"});
         COMMENT_END_MAP.put(SupportFileType.CPP.getType(), new String[]{"*/"});
 
+        COMMENT_START_MAP.put(SupportFileType.CC.getType(), new String[]{"//", "/*"});
+        COMMENT_END_MAP.put(SupportFileType.CC.getType(), new String[]{"*/"});
+
+        COMMENT_START_MAP.put(SupportFileType.CXX.getType(), new String[]{"//", "/*"});
+        COMMENT_END_MAP.put(SupportFileType.CXX.getType(), new String[]{"*/"});
+
+        COMMENT_START_MAP.put(SupportFileType.CPLUSPLUS.getType(), new String[]{"//", "/*"});
+        COMMENT_END_MAP.put(SupportFileType.CPLUSPLUS.getType(), new String[]{"*/"});
+
+        COMMENT_START_MAP.put(SupportFileType.C.getType(), new String[]{"//", "/*"});
+        COMMENT_END_MAP.put(SupportFileType.C.getType(), new String[]{"*/"});
+
         COMMENT_START_MAP.put(SupportFileType.H.getType(), new String[]{"//", "/*"});
         COMMENT_END_MAP.put(SupportFileType.H.getType(), new String[]{"*/"});
+
+        COMMENT_START_MAP.put(SupportFileType.HPP.getType(), new String[]{"//", "/*"});
+        COMMENT_END_MAP.put(SupportFileType.HPP.getType(), new String[]{"*/"});
+
+        COMMENT_START_MAP.put(SupportFileType.HH.getType(), new String[]{"//", "/*"});
+        COMMENT_END_MAP.put(SupportFileType.HH.getType(), new String[]{"*/"});
+
+        COMMENT_START_MAP.put(SupportFileType.HXX.getType(), new String[]{"//", "/*"});
+        COMMENT_END_MAP.put(SupportFileType.HXX.getType(), new String[]{"*/"});
+
+        COMMENT_START_MAP.put(SupportFileType.HPLUSPLUS.getType(), new String[]{"//", "/*"});
+        COMMENT_END_MAP.put(SupportFileType.HPLUSPLUS.getType(), new String[]{"*/"});
+
+        COMMENT_START_MAP.put(SupportFileType.TPP.getType(), new String[]{"//", "/*"});
+        COMMENT_END_MAP.put(SupportFileType.TPP.getType(), new String[]{"*/"});
+
+        COMMENT_START_MAP.put(SupportFileType.INL.getType(), new String[]{"//", "/*"});
+        COMMENT_END_MAP.put(SupportFileType.INL.getType(), new String[]{"*/"});
+
+        COMMENT_START_MAP.put(SupportFileType.IPP.getType(), new String[]{"//", "/*"});
+        COMMENT_END_MAP.put(SupportFileType.IPP.getType(), new String[]{"*/"});
 
 
         COMMENT_START_MAP.put(SupportFileType.SQL.getType(), new String[]{"--", "/*"});

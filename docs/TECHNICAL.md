@@ -147,6 +147,8 @@ public synchronized void replace(@NotNull DocumentEvent event, Editor editor,
 | XML | `<!--` | `-->` |
 | Git Ignore | `#` | - |
 
+> C/C++ 支持的扩展名：`.cpp`、`.cc`、`.cxx`、`.c++`、`.c`、`.h`、`.hpp`、`.hh`、`.hxx`、`.h++`、`.tpp`、`.inl`、`.ipp`。以上类型在 `SupportFileType` 枚举与 `CnCharCommentUtil` 的注释标记映射中成对注册，适用于 CLion/Rider 等 IDE 编辑 C/C++ 文件的场景。
+
 **核心方法**:
 
 - `isComment()`: 判断当前行是否是注释
@@ -250,7 +252,7 @@ public synchronized void replace(@NotNull DocumentEvent event, Editor editor,
 ### 6.3 兼容性
 
 - 最低支持: IDEA 203.5981 (2020.3)
-- 依赖模块: `com.intellij.modules.platform`, `com.intellij.modules.lang`
+- 依赖模块: `com.intellij.modules.platform`, `com.intellij.modules.lang`（通用模块，因此兼容 CLion、Rider 等基于 IntelliJ 平台的 IDE）
 
 ## 7. 外部资源
 

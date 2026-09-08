@@ -7,10 +7,10 @@
  2. It is not automatically replaced in the annotation area. The annotation part is probably entered in Chinese. Therefore, the comment area is not automatically replaced
 
 
- 3. Most file types (development languages) are supported. If individual file types are not supported.
+ 3. Most file types (development languages) are supported, including C/C++ source and header files (.c, .cc, .cpp, .cxx, .h, .hpp, .hh, .hxx, etc.). If individual file types are not supported.
 
 
- 4. support idea 2020.3+ .
+ 4. support idea 2020.3+ . Also works in IntelliJ-platform based IDEs such as CLion and Rider.
 
 # code repo：
 

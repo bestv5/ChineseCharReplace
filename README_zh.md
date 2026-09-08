@@ -3,8 +3,8 @@
 # 功能说明:
 1. 该插件自动替换输入的中文标点,不用刻意切换输入法了，大大减少键盘按键寿命。
 2. 在注释区域不会自动替换。注释部分还是大概率使用中文输入的。所以注释区域就不自动替换了。
-3. 支持大部分文件类型（我目前使用的语言是java、js、SQL、markdown等），其他语言没有测试过，兼容性不完全保证。
-4. 支持 idea 2020.3 以上版本.
+3. 支持大部分文件类型（包括 java、js、SQL、markdown 以及 C/C++ 源文件和头文件：.c、.cc、.cpp、.cxx、.h、.hpp、.hh、.hxx 等），其他语言没有测试过，兼容性不完全保证。
+4. 支持 idea 2020.3 以上版本；同样适用于 CLion、Rider 等基于 IntelliJ 平台的 IDE。
 
 # 代码仓库
 1) **github**: [https://github.com/ranbest/ChineseCharReplace](https://github.com/ranbest/ChineseCharReplace)
