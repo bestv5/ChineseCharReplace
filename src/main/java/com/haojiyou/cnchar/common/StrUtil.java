@@ -70,4 +70,39 @@ public final class StrUtil {
         }
         return false;
     }
+
+    /**
+     * null 安全的空白判断：cs 为 null、长度为 0，或全部字符均为 {@link Character#isWhitespace} 时返回 true。
+     * 语义对齐 commons-lang3 StringUtils#isBlank。
+     */
+    public static boolean isBlank(CharSequence cs) {
+        if (cs == null) {
+            return true;
+        }
+        int length = cs.length();
+        if (length == 0) {
+            return true;
+        }
+        for (int i = 0; i < length; i++) {
+            if (!Character.isWhitespace(cs.charAt(i))) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    /**
+     * {@link #isBlank(CharSequence)} 的反义，语义对齐 commons-lang3 StringUtils#isNotBlank。
+     */
+    public static boolean isNotBlank(CharSequence cs) {
+        return !isBlank(cs);
+    }
+
+    /**
+     * null 安全的去除首尾空白：str 为 null 返回 null，否则返回 {@link String#trim()}。
+     * 语义对齐 commons-lang3 StringUtils#trim。
+     */
+    public static String trim(String str) {
+        return str == null ? null : str.trim();
+    }
 }

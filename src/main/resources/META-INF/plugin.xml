@@ -23,6 +23,7 @@
                                  nonDefaultProject="false"/>
         <typedHandler implementation="com.haojiyou.cnchar.handler.ChineseCharCheckHandler" id="com.haojiyou.cnchar.ChineseCharCheckHandler"/>
         <applicationService serviceImplementation="com.haojiyou.cnchar.service.HintService" id="hintService"/>
+        <applicationService serviceImplementation="com.haojiyou.cnchar.settings.CharAutoReplaceSettings"/>
     </extensions>
 
 </idea-plugin>
