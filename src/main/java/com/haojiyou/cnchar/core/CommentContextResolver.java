@@ -111,12 +111,63 @@ public final class CommentContextResolver {
 
         String blockPrefix = commenter.getBlockCommentPrefix();
         String blockSuffix = commenter.getBlockCommentSuffix();
-        if (blockPrefix != null && blockSuffix != null) {
-            if (lineText.startsWith(blockPrefix) || lineText.endsWith(blockSuffix)) {
-                return true;
-            }
+        if (blockPrefix != null && !blockPrefix.isEmpty()
+                && blockSuffix != null && !blockSuffix.isEmpty()) {
+            CharSequence before = document.getCharsSequence();
+            int end = Math.min(offset, before.length());
+            return isInsideBlockComment(before.subSequence(0, end), blockPrefix, blockSuffix);
         }
 
         return false;
+    }
+
+    /**
+     * 纯逻辑：判断光标前文本是否处于一个<b>未闭合</b>的块注释内部。
+     *
+     * <p>从头扫描，遇到 {@code blockPrefix} 记为开、遇到 {@code blockSuffix} 记为闭；
+     * 结束时若仍有未闭合的开标记，则光标位于块注释内。语言无关，仅依赖成对标记，
+     * 覆盖 C/C++/SQL/XML 多行块注释的中间行（PSI 不可用时的兜底）。
+     *
+     * @param before      光标前文本（可为子序列视图）
+     * @param blockPrefix 块注释起始标记
+     * @param blockSuffix 块注释结束标记
+     * @return true = 在块注释内
+     */
+    static boolean isInsideBlockComment(CharSequence before, String blockPrefix, String blockSuffix) {
+        if (before == null || blockPrefix == null || blockPrefix.isEmpty()
+                || blockSuffix == null || blockSuffix.isEmpty()) {
+            return false;
+        }
+        int n = before.length();
+        int pn = blockPrefix.length();
+        int sn = blockSuffix.length();
+        boolean open = false;
+        int i = 0;
+        while (i < n) {
+            if (matchesAt(before, i, blockPrefix, pn)) {
+                open = true;
+                i += pn;
+                continue;
+            }
+            if (open && matchesAt(before, i, blockSuffix, sn)) {
+                open = false;
+                i += sn;
+                continue;
+            }
+            i++;
+        }
+        return open;
+    }
+
+    private static boolean matchesAt(CharSequence s, int i, String token, int tokenLen) {
+        if (i + tokenLen > s.length()) {
+            return false;
+        }
+        for (int k = 0; k < tokenLen; k++) {
+            if (s.charAt(i + k) != token.charAt(k)) {
+                return false;
+            }
+        }
+        return true;
     }
 }
