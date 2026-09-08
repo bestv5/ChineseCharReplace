@@ -184,12 +184,17 @@ public final class CharAutoReplaceSettings
         /** 各区策略（不可变 EnumMap 视图）。 */
         private final Map<InputRegion, RegionPolicy.ReplaceMode> regionModes;
 
+        /** 是否显示替换提示（来自 State.showHint，不可变）。 */
+        private final boolean showHint;
+
         private Snapshot(Set<Character> multiCharFirstChars,
                          Map<String, String> charMap,
-                         Map<InputRegion, RegionPolicy.ReplaceMode> regionModes) {
+                         Map<InputRegion, RegionPolicy.ReplaceMode> regionModes,
+                         boolean showHint) {
             this.multiCharFirstChars = multiCharFirstChars;
             this.charMap = charMap;
             this.regionModes = regionModes;
+            this.showHint = showHint;
         }
 
         /**
@@ -220,7 +225,8 @@ public final class CharAutoReplaceSettings
             Snapshot snapshot = new Snapshot(
                     Collections.unmodifiableSet(multiFirst),
                     Collections.unmodifiableMap(merged),
-                    buildRegionModes(s));
+                    buildRegionModes(s),
+                    s.showHint);
             boolean[] bits = snapshot.candidate;
             // 全角区 0xFF01–0xFF5E
             for (int c = CharConverter.fullWidthStart(); c <= CharConverter.fullWidthEnd(); c++) {
@@ -268,6 +274,11 @@ public final class CharAutoReplaceSettings
         public RegionPolicy.ReplaceMode getMode(InputRegion region) {
             RegionPolicy.ReplaceMode m = regionModes.get(region);
             return m == null ? RegionPolicy.ReplaceMode.NEVER : m;
+        }
+
+        /** 是否显示替换提示。 */
+        public boolean isShowHint() {
+            return showHint;
         }
     }
 }

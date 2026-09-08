@@ -4,9 +4,9 @@
 
 **项目名称**: CharAutoReplace  
 **项目类型**: IntelliJ IDEA 插件  
-**主要功能**: 在编写代码时自动将中文标点符号替换为英文标点符号，提高编码效率并延长键盘使用寿命  
-**支持版本**: IntelliJ IDEA 2020.3+  
-**当前版本**: 1.7.0
+**主要功能**: 实时中英文混输标点替换助手——输入中文标点时自动替换为对应英文标点，支持区域策略（代码区恒开、注释/字符串自适应、控制台恒关）  
+**支持版本**: IntelliJ IDEA 2020.3+（since-build 203，无 until-build 上限）  
+**当前版本**: 2.0.0
 
 ## 2. 技术架构
 
@@ -15,244 +15,139 @@
 | 组件 | 技术选型 |
 |------|----------|
 | 开发语言 | Java 11 |
-| 构建工具 | Gradle 6.8 |
+| 构建工具 | Gradle 6.8+ |
 | IDE框架 | IntelliJ Platform SDK |
-| 依赖库 | Apache Commons Text 1.12.0 |
-| 测试框架 | JUnit Jupiter 5.7.2 |
+| 依赖库 | 无第三方运行时依赖（HTML 转义纯 JDK 实现） |
+| 测试框架 | JUnit Jupiter 5.7.2 + junit-vintage-engine |
 
 ### 2.2 项目结构
 
 ```
 CharAutoReplace/
 ├── src/main/java/com/haojiyou/cnchar/
-│   ├── CharTypedDocumentLisener.java       # 文档监听器 - 核心替换逻辑
-│   ├── CnCharSettingComponent.java         # 设置面板组件
-│   ├── action/
-│   │   └── CharAutoReplaceAction.java       # 字符替换执行动作
 │   ├── common/
-│   │   ├── CnCharCommentUtil.java           # 注释区域判断工具类
-│   │   ├── DocumentUtil.java                 # 文档操作工具类
 │   │   ├── MyConst.java                     # 常量定义
-│   │   ├── ReplaceCharConfig.java           # 替换配置管理
+│   │   ├── StrUtil.java                     # 字符串工具（纯 JDK，无第三方依赖）
 │   │   └── SupportFileType.java             # 支持的文件类型枚举
+│   ├── convert/
+│   │   └── CharConverter.java               # 三层转换引擎（自定义 > 精选表 > 全角偏移）
+│   ├── core/
+│   │   ├── CjkContextDetector.java           # CJK 语境启发式检测（自适应策略）
+│   │   ├── CommentContextResolver.java       # PSI + Commenter 兜底注释识别
+│   │   ├── EditorContext.java                # 不可变编辑器上下文值对象
+│   │   ├── PolicyEngine.java                 # 区域策略引擎（ALWAYS/NEVER/ADAPTIVE）
+│   │   ├── RegionClassifier.java             # 区域分类器（CODE/COMMENT/STRING/COMMIT/CONSOLE/PLAIN_TEXT）
+│   │   └── ReplacementExecutor.java          # 同步替换 + 光标修正 + 单步撤销 + 提示
 │   ├── handler/
-│   │   └── ChineseCharCheckHandler.java     # 字符输入处理器
-│   └── service/
-│       └── HintService.java                 # 提示信息显示服务
+│   │   └── ChineseCharCheckHandler.java      # charTyped 管线入口
+│   ├── region/
+│   │   └── InputRegion.java                  # 区域枚举
+│   ├── rule/
+│   │   ├── BlankInputRule.java               # 前置规则：空输入过滤
+│   │   ├── InputLengthRule.java              # 前置规则：输入长度过滤
+│   │   ├── NoMappingRule.java                # 前置规则：无映射过滤
+│   │   ├── ReplacementRule.java              # 规则接口
+│   │   └── ReplacementRuleChain.java         # 规则链（组合模式）
+│   ├── service/
+│   │   └── HintService.java                  # 替换提示显示服务
+│   └── settings/
+│       ├── CharAutoReplaceConfigurable.java   # 设置 UI（FormBuilder + JBTable + 每区三态）
+│       ├── CharAutoReplaceSettings.java       # PersistentStateComponent + 不可变快照
+│       ├── LegacyConfigMigrator.java          # 旧配置迁移器
+│       ├── MappingRule.java                   # 自定义映射规则值对象
+│       └── RegionPolicy.java                  # 区域策略枚举与默认值
 ├── src/main/resources/
 │   └── META-INF/
-│       └── plugin.xml                       # 插件配置文件
-├── build.gradle                             # Gradle 构建配置
+│       └── plugin.xml                        # 插件配置
+├── src/test/java/                             # 单元测试与集成测试
+├── build.gradle                              # Gradle 构建配置
 └── docs/
-    └── CHANGELOG.md                         # 版本变更日志
+    ├── TECHNICAL.md                          # 本文档
+    └── CHANGELOG.md                          # 版本变更日志
 ```
 
-## 3. 核心模块详解
+## 3. 核心架构
 
-### 3.1 字符输入处理链
+### 3.1 charTyped 管线
 
 ```
 用户输入字符
      ↓
-ChineseCharCheckHandler.beforeCharTyped()
+ChineseCharCheckHandler.charTyped()
      ↓
-添加 DocumentListener
+isCandidateChar() — O(1) 位图过滤
      ↓
-CharTypedDocumentLisener.documentChanged()
+EditorContext 构建（不可变值对象）
      ↓
-判断是否可替换
+ReplacementRuleChain.checkAll() — 前置规则链
      ↓
-CharAutoReplaceAction.replace()
+RegionClassifier.classify() — 区域识别
      ↓
-执行替换 + 显示提示(可选)
+PolicyEngine.decide() — 策略判定（ALWAYS/NEVER/ADAPTIVE）
+     ↓
+CharConverter.convert() — 三层转换
+     ↓
+ReplacementExecutor.execute() — WriteCommandAction 替换 + 单步撤销
 ```
 
-### 3.2 核心组件
+### 3.2 区域策略
 
-#### 3.2.1 ChineseCharCheckHandler
+| 区域 | 默认策略 | 说明 |
+|------|----------|------|
+| CODE | ALWAYS | 代码区恒开 |
+| COMMENT | ADAPTIVE | 按光标前文中英文语境启发式决定 |
+| STRING | ADAPTIVE | 同上 |
+| COMMIT | ADAPTIVE | Git 提交信息 |
+| CONSOLE | NEVER | 控制台恒关 |
+| PLAIN_TEXT | ADAPTIVE | 纯文本 |
+| UNREACHABLE | NEVER | 不可达区域，恒排除 |
 
-**位置**: `handler/ChineseCharCheckHandler.java`  
-**职责**: 字符输入前置处理器，实现 `TypedHandlerDelegate` 接口  
-**关键方法**:
+### 3.3 三层转换引擎
 
-- `beforeCharTyped()`: 在字符输入前触发，添加文档监听器
+1. **自定义映射**（用户配置，最高优先级）
+2. **精选 CJK 标点表**（内置 curated table）
+3. **全角偏移算术**（0xFF01–0xFF5E 范围，O(1) 计算）
 
-```java
-@Override
-public @NotNull Result beforeCharTyped(char c, @NotNull Project project, 
-                                       @NotNull Editor editor, 
-                                       @NotNull PsiFile file, 
-                                       @NotNull FileType fileType) {
-    editor.getDocument().addDocumentListener(new CharTypedDocumentLisener(editor, file));
-    return Result.CONTINUE;
-}
-```
+### 3.4 配置模型
 
-#### 3.2.2 CharTypedDocumentLisener
+- `CharAutoReplaceSettings` 实现 `PersistentStateComponent`，持久化用户配置
+- `Snapshot` 不可变快照：volatile 字段 + 原子引用，读取零锁
+- 位图候选探测：`boolean[65536]`，O(1) 判断字符是否可能需要替换
+- `LegacyConfigMigrator` 兼容旧版配置格式自动迁移
 
-**位置**: `CharTypedDocumentLisener.java`  
-**职责**: 实现 `DocumentListener` 接口，监听文档变化并执行替换逻辑  
-**核心逻辑**:
+### 3.5 设置 UI
 
-1. 过滤输入长度 > 5 的情况
-2. 查找替换映射 (`ReplaceCharConfig.cnCharMap`)
-3. 判断当前光标位置是否在注释区域
-4. 判断是否满足替换条件
-
-**关键方法**: `isCanBeReplaced()`
-
-- 检查是否为空输入
-- 检查是否存在替换映射
-- 使用 PSI API 判断注释区域
-- 处理自定义注释识别
-
-#### 3.2.3 CharAutoReplaceAction
-
-**位置**: `action/CharAutoReplaceAction.java`  
-**职责**: 执行实际的字符替换操作  
-**关键特性**:
-
-- 线程安全: 使用 synchronized 关键字
-- 异步执行: 使用 `ApplicationManager.getApplication().invokeLater()`
-- 写入操作: 使用 `WriteCommandAction.runWriteCommandAction()`
-- 提示功能: 替换后显示提示信息(可选)
-
-```java
-public synchronized void replace(@NotNull DocumentEvent event, Editor editor,
-                                  String originalText, String replacement) {
-    ApplicationManager.getApplication().invokeLater(() -> {
-        WriteCommandAction.runWriteCommandAction(project, () -> {
-            document.replaceString(event.getOffset(), currentOffset, replacement);
-            // 显示替换提示(如果启用)
-        });
-    });
-}
-```
-
-### 3.3 注释区域识别
-
-#### 3.3.1 CnCharCommentUtil
-
-**位置**: `common/CnCharCommentUtil.java`  
-**支持的文件类型**:
-
-| 文件类型 | 注释开始符 | 注释结束符 |
-|----------|------------|------------|
-| Java | `//`, `/*` | `*/` |
-| JavaScript | `//`, `/*` | `*/` |
-| TypeScript | `//`, `/*` | `*/` |
-| TSX | `//`, `/*` | `*/` |
-| C/C++ | `//`, `/*` | `*/` |
-| SQL | `--`, `/*` | `*/` |
-| XML | `<!--` | `-->` |
-| Git Ignore | `#` | - |
-
-> C/C++ 支持的扩展名：`.cpp`、`.cc`、`.cxx`、`.c++`、`.c`、`.h`、`.hpp`、`.hh`、`.hxx`、`.h++`、`.tpp`、`.inl`、`.ipp`。以上类型在 `SupportFileType` 枚举与 `CnCharCommentUtil` 的注释标记映射中成对注册，适用于 CLion/Rider 等 IDE 编辑 C/C++ 文件的场景。
-
-**核心方法**:
-
-- `isComment()`: 判断当前行是否是注释
-- `isCustomComment()`: 判断是否为自定义注释区域
-- `isAfterEndOfComment()`: 判断是否在块注释结束符之后
-
-### 3.4 配置管理
-
-#### 3.4.1 ReplaceCharConfig
-
-**位置**: `common/ReplaceCharConfig.java`  
-**配置项**:
-
-| 配置项 | 类型 | 默认值 | 说明 |
-|--------|------|--------|------|
-| `cnCharMap` | Map<String, String> | 中文→英文标点映射 | 替换映射表 |
-| `showRepacedMsg` | boolean | false | 是否显示替换提示 |
-| `replaceInComment` | boolean | false | 是否在注释区域替换 |
-
-**默认替换映射**:
-
-```
-， → ,   。 → .   ： → :   ； → ;   ！ → !   ？ → ?   
-" → "   " → "   ' → '   ' → '   【 → [   】 → ]   
-（ → (   ） → )   「 → {   」 }   《 → <   》 >   、 → /
-```
-
-#### 3.4.2 CnCharSettingComponent
-
-**位置**: `CnCharSettingComponent.java`  
-**职责**: IntelliJ IDEA 设置界面配置组件  
-**功能**:
-
-- 30组中英文标点映射配置
-- 启用替换提示复选框
-- 启用注释内替换复选框
-- 恢复默认设置按钮
-
-### 3.5 提示服务
-
-#### 3.5.1 HintService
-
-**位置**: `service/HintService.java`  
-**功能**: 在编辑器中显示替换提示信息  
-**提示样式**: HTML 格式的浮动提示
+- `CharAutoReplaceConfigurable`：FormBuilder 布局 + JBTable 自定义映射（无行数上限）
+- 每区域三态 ComboBox（开/关/自适应）
+- 恢复默认按钮
+- 替换提示开关
 
 ## 4. 插件配置
 
-### 4.1 plugin.xml 配置
+### 4.1 plugin.xml 关键扩展点
 
 ```xml
-<idea-plugin>
-    <id>com.haojiyou.CharAutoReplace</id>
-    <name>CharAutoReplace</name>
-    <vendor email="lixr873@163.com" url="https://github.com/ranbest/ChineseCharReplace">best.xu</vendor>
-    <description>
-        中文字符自动替换成英文字符插件。提高了写代码效率，增加了键盘寿命。
-    </description>
-    <idea-version since-build="203.5981"/>
-    
-    <extensions defaultExtensionNs="com.intellij">
-        <!-- 设置面板 -->
-        <applicationConfigurable parentId="tools" 
-            instance="com.haojiyou.cnchar.CnCharSettingComponent"/>
-        
-        <!-- 字符输入处理器 -->
-        <typedHandler implementation="com.haojiyou.cnchar.handler.ChineseCharCheckHandler"/>
-        
-        <!-- 提示服务 -->
-        <applicationService serviceImplementation="com.haojiyou.cnchar.service.HintService"/>
-    </extensions>
-</idea-plugin>
+<extensions defaultExtensionNs="com.intellij">
+    <applicationConfigurable parentId="tools" 
+        instance="com.haojiyou.cnchar.settings.CharAutoReplaceConfigurable"/>
+    <typedHandler implementation="com.haojiyou.cnchar.handler.ChineseCharCheckHandler"/>
+    <applicationService serviceImplementation="com.haojiyou.cnchar.service.HintService"/>
+    <applicationService serviceImplementation="com.haojiyou.cnchar.settings.CharAutoReplaceSettings"/>
+</extensions>
 ```
 
-## 5. 版本历史
+## 5. 性能特征
 
-| 版本 | 更新内容 |
-|------|----------|
-| 1.7.0 | 增加 .cpp, .h, .ts, .tsx 扩展名支持 |
-| 1.6.1 | 移除过时的 API |
-| 1.6.0 | 添加注释区域替换配置选项 |
-| 1.5.0 | 添加替换提示显示配置 |
-| 1.4.0 | 添加注释行结束判断，移除 txt/markdown 文件支持 |
-| 1.3.1 | 修复 DataGrid 中无法自动替换的问题 |
-| 1.3.0 | 添加替换命中统计 |
-| 1.0.0 | 初始版本 |
+- **候选位图**：`boolean[65536]`，O(1) 零分配探测
+- **不可变快照**：配置变更时构建新快照，读取路径无锁
+- **规则链短路**：前置规则任一失败即返回，不进入区域分类
+- **WriteCommandAction**：单步撤销，替换操作可一次性撤回
 
-## 6. 关键实现细节
-
-### 6.1 线程安全
-
-- `CharAutoReplaceAction.replace()` 使用 synchronized 确保并发安全
-- 使用 `ApplicationManager.getApplication().invokeLater()` 确保 UI 线程安全
-
-### 6.2 性能优化
-
-- 输入长度 > 5 时直接跳过处理
-- 使用 `EditorImpl` 类型检查避免无效处理
-- 每次事件处理后移除监听器避免重复执行
-
-### 6.3 兼容性
+## 6. 兼容性
 
 - 最低支持: IDEA 203.5981 (2020.3)
-- 依赖模块: `com.intellij.modules.platform`, `com.intellij.modules.lang`（通用模块，因此兼容 CLion、Rider 等基于 IntelliJ 平台的 IDE）
+- 依赖模块: `com.intellij.modules.platform`, `com.intellij.modules.lang`
+- 兼容 CLion、Rider 等基于 IntelliJ 平台的 IDE
 
 ## 7. 外部资源
 

@@ -96,7 +96,7 @@ public final class ReplacementExecutor {
     }
 
     private static boolean shouldShowHint(@NotNull CharAutoReplaceSettings.Snapshot snapshot) {
-        return false;
+        return snapshot.isShowHint();
     }
 
     private static void showHint(@NotNull Editor editor, @NotNull String original, @NotNull String replacement) {

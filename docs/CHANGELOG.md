@@ -14,6 +14,32 @@
 
 ### Security
 
+## 2.0.0 - 2026-09-08
+
+### Added
+
+- 区域策略引擎：按 CODE/COMMENT/STRING/COMMIT/CONSOLE/PLAIN_TEXT 六区域分别配置替换策略（开/关/自适应）
+- CJK 语境自适应检测（CjkContextDetector）：注释与字符串区域内根据光标前文中英文语境启发式决定是否替换
+- 三层转换引擎（CharConverter）：自定义映射 > 精选 CJK 标点表 > 全角偏移算术，支持多字符键
+- 不可变快照配置模型（Snapshot）：volatile 引用 + O(1) 位图候选探测，读取零锁
+- 设置 UI 重建：FormBuilder + JBTable 自定义映射（无行数上限），每区域三态 ComboBox
+- 旧配置自动迁移（LegacyConfigMigrator）
+- 单步撤销：替换操作封装在 WriteCommandAction 中，一次撤回即可还原
+
+### Changed
+
+- 输入入口从 DocumentListener 改为 charTyped 管线（TypedHandlerDelegate），实时性更好
+- 注释识别从硬编码标记改为 PSI + Commenter 兜底（CommentContextResolver）
+- 提示服务改为 applicationService 按需获取，去除静态单例
+- HTML 转义纯 JDK 实现，无第三方运行时依赖
+
+### Removed
+
+- 删除旧 DocumentListener 方案（CharTypedDocumentLisener）
+- 删除旧注释工具类（CnCharCommentUtil）
+- 删除旧设置面板（CnCharSettingComponent）
+- 删除旧替换动作（CharAutoReplaceAction）、旧配置（ReplaceCharConfig）、旧文档工具（DocumentUtil）
+
 ## 1.8.0-beta1 - 2026-09-08
 
 ### Added
