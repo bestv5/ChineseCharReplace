@@ -103,9 +103,7 @@ public final class ReplacementExecutor {
         try {
             HintService hintService = HintService.getInstance();
             String hint = hintService.createHint(original, replacement);
-            if (editor instanceof com.intellij.openapi.editor.impl.EditorImpl) {
-                hintService.showHint((com.intellij.openapi.editor.impl.EditorImpl) editor, hint, null);
-            }
+            hintService.showHint(editor, hint, null);
         } catch (Exception e) {
             // 提示失败不影响主流程
         }

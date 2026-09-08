@@ -1,5 +1,9 @@
 package com.haojiyou.cnchar.common;
 
+import java.util.HashMap;
+import java.util.Locale;
+import java.util.Map;
+
 /**
  * 描述: 支持的文件类型
  *
@@ -55,6 +59,14 @@ public enum SupportFileType {
 
     private final String type;
 
+    private static final Map<String, SupportFileType> LOOKUP = new HashMap<>();
+
+    static {
+        for (SupportFileType t : values()) {
+            LOOKUP.put(t.type.toLowerCase(Locale.ROOT), t);
+        }
+    }
+
     SupportFileType(String type) {
         this.type = type;
     }
@@ -63,13 +75,7 @@ public enum SupportFileType {
         if (fileExtension == null) {
             return null;
         }
-
-        for (SupportFileType type : SupportFileType.values()) {
-            if (StrUtil.equalsIgnoreCase(fileExtension, type.type)) {
-                return type;
-            }
-        }
-        return null;
+        return LOOKUP.get(fileExtension.toLowerCase(Locale.ROOT));
     }
 
     public String getType() {

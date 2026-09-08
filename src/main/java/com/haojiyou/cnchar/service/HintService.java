@@ -4,7 +4,6 @@ import com.intellij.codeInsight.hint.HintManagerImpl;
 import com.intellij.codeInsight.hint.HintUtil;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.editor.Editor;
-import com.intellij.openapi.editor.impl.EditorImpl;
 import com.intellij.ui.LightweightHint;
 import com.intellij.util.ui.accessibility.AccessibleContextUtil;
 
@@ -27,14 +26,14 @@ public static HintService getInstance(){
 }
 
 
-    public void showHint(EditorImpl editor, String text, HyperlinkListener hyperlinkListener) {
+    public void showHint(Editor editor, String text, HyperlinkListener hyperlinkListener) {
         HintManagerImpl hintManager = (HintManagerImpl) HintManagerImpl.getInstance();
         JComponent label = HintUtil.createInformationLabel(text, hyperlinkListener, null, null);
         if (!ApplicationManager.getApplication().isUnitTestMode()) {
             AccessibleContextUtil.setName(label, "Hint");
             LightweightHint hint = new LightweightHint(label);
-            Point p = HintManagerImpl.getHintPosition(hint, (Editor) editor, editor.getCaretModel().getVisualPosition(), (short) 1);
-            hintManager.showEditorHint(hint, (Editor) editor, p, 12, 0, true, (short) 1);
+            Point p = HintManagerImpl.getHintPosition(hint, editor, editor.getCaretModel().getVisualPosition(), (short) 1);
+            hintManager.showEditorHint(hint, editor, p, 12, 0, true, (short) 1);
         }
 
     }
