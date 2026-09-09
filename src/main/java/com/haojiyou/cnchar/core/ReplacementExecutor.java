@@ -50,14 +50,11 @@ public final class ReplacementExecutor {
             String beforeCursor = document.getText().substring(Math.max(0, offset - CharConverter.MAX_MULTI_CHAR_LEN), offset);
             conversion = converter.convertTail(beforeCursor);
             if (conversion != null) {
-                int matchLen = beforeCursor.length();
-                for (int size = Math.min(beforeCursor.length(), CharConverter.MAX_MULTI_CHAR_LEN); size >= 2; size--) {
-                    String key = beforeCursor.substring(beforeCursor.length() - size);
-                    if (converter.convertTail(key) != null) {
-                        matchLen = size;
-                        break;
-                    }
-                }
+                // convertTail 已按“最长优先”命中确切的多字符自定义键，其 Conversion.delta =
+                // 替换串长度 − 命中的键长度（见 CharConverter#convertTail 契约），故命中的实际键长度
+                // 可由 length() − delta 精确还原。据此定位 replaceStart，仅替换匹配键本身，
+                // 不再左移到窗口起点误删前缀无关字符（修复 over-delete 缺陷）。
+                int matchLen = conversion.length() - conversion.delta;
                 int replaceStart = offset - matchLen;
                 doReplace(editor, document, project, replaceStart, offset, conversion, typedChar, snapshot);
                 return;

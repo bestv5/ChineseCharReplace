@@ -33,7 +33,7 @@ public class ReplacementRuleChain {
     public static ReplacementRuleChain defaultChain(
             @NotNull com.haojiyou.cnchar.settings.CharAutoReplaceSettings.Snapshot snapshot) {
         List<ReplacementRule> rules = new ArrayList<>();
-        rules.add(new BlankInputRule());
+        rules.add(new BlankInputRule(snapshot));
         rules.add(new NoMappingRule(snapshot));
         rules.add(new InputLengthRule());
         return new ReplacementRuleChain(rules);

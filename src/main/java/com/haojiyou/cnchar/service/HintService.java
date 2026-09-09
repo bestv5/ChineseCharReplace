@@ -1,15 +1,10 @@
 package com.haojiyou.cnchar.service;
 
-import com.intellij.codeInsight.hint.HintManagerImpl;
-import com.intellij.codeInsight.hint.HintUtil;
+import com.intellij.codeInsight.hint.HintManager;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.editor.Editor;
-import com.intellij.ui.LightweightHint;
-import com.intellij.util.ui.accessibility.AccessibleContextUtil;
 
-import javax.swing.*;
 import javax.swing.event.HyperlinkListener;
-import java.awt.*;
 
 /**
  * 描述:
@@ -26,16 +21,30 @@ public static HintService getInstance(){
 }
 
 
+    /**
+     * 在编辑器光标处展示信息提示（公共 API 版）。
+     *
+     * <p>已从内部类 {@code HintManagerImpl} 迁移到公共 {@link HintManager}：
+     * 原手工流程（HintUtil.createInformationLabel → AccessibleContextUtil.setName("Hint") →
+     * new LightweightHint → getHintPosition(ABOVE) → showEditorHint）与平台公共 API
+     * {@link HintManager#showInformationHint(Editor, String, HyperlinkListener)} 的内部实现
+     * <b>基本等价</b>（含 isUnitTestMode 早退，判定逻辑无分叉），但非逐项等价，差异见下。
+     *
+     * <p><b>已知残留差异</b>：
+     * <ul>
+     *   <li><b>可访问性名称缺失</b>：原手工流程含 {@code AccessibleContextUtil.setName(label, "Hint")}
+     *       （辅助功能/读屏名称），公共 {@code showInformationHint} 内部构建的 label 不含此步骤。
+     *       javap 203 核实：存在理论恢复路径 {@code HintUtil.createInformationLabel → setName →
+     *       HintManager#showInformationHint(Editor, JComponent)}（公共重载，platform-api 实证），
+     *       但该重载不接受 {@link HyperlinkListener}（本方法现有调用携带 listener），且会引入
+     *       新的 label 构建与展示路径差异；待 runIde 确认现有路径行为后再评估，暂不实施；</li>
+     *   <li>原手工调用使用的精确偏移 (12,0) 与 hide flags=12 已被平台默认值取代；提示的
+     *       定位/隐藏细微行为需 runIde 实测观察，如出现可感知偏差，再评估处理方案
+     *       （勿直接改回内部 API）。</li>
+     * </ul>
+     */
     public void showHint(Editor editor, String text, HyperlinkListener hyperlinkListener) {
-        HintManagerImpl hintManager = (HintManagerImpl) HintManagerImpl.getInstance();
-        JComponent label = HintUtil.createInformationLabel(text, hyperlinkListener, null, null);
-        if (!ApplicationManager.getApplication().isUnitTestMode()) {
-            AccessibleContextUtil.setName(label, "Hint");
-            LightweightHint hint = new LightweightHint(label);
-            Point p = HintManagerImpl.getHintPosition(hint, editor, editor.getCaretModel().getVisualPosition(), (short) 1);
-            hintManager.showEditorHint(hint, editor, p, 12, 0, true, (short) 1);
-        }
-
+        HintManager.getInstance().showInformationHint(editor, text, hyperlinkListener);
     }
 
 

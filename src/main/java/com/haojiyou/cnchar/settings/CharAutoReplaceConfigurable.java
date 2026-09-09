@@ -5,12 +5,15 @@ import com.intellij.openapi.options.Configurable;
 import com.intellij.openapi.ui.ComboBox;
 import com.intellij.ui.AnActionButton;
 import com.intellij.ui.ToolbarDecorator;
+import com.intellij.ui.components.ActionLink;
 import com.intellij.ui.table.JBTable;
+import com.intellij.util.ui.FormBuilder;
 import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
 import javax.swing.table.AbstractTableModel;
 import java.awt.*;
+import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -18,10 +21,14 @@ import java.util.List;
  * 描述: 新设置 UI —— FormBuilder 布局 + JBTable 映射表 + 每区三态控件。
  *
  * <p>替代旧 {@code CnCharSettingComponent}（绝对布局 + 固定 30 行文本框）。
+ * 帮助主题 {@code CharAutoReplace.settings}，由 CharAutoReplaceHelpProvider 解析为在线文档。
  *
  * @author : best.xu
  */
 public class CharAutoReplaceConfigurable implements Configurable {
+
+    /** 区域三态下拉的显示文案（索引与 ReplaceMode.ordinal() 对应）。 */
+    private static final String[] MODE_LABELS = {"开 (ALWAYS)", "关 (NEVER)", "自适应 (ADAPTIVE)"};
 
     private JPanel mainPanel;
     private MappingTableModel mappingTableModel;
@@ -39,22 +46,45 @@ public class CharAutoReplaceConfigurable implements Configurable {
         return "CharAutoReplace";
     }
 
+    /**
+     * 帮助主题：配合 plugin.xml 注册的
+     * {@code <webHelpProvider implementation="com.haojiyou.cnchar.service.CharAutoReplaceHelpProvider"/>}
+     * 解析为项目在线文档地址（设置页 F1 帮助）。
+     */
+    @Override
+    public String getHelpTopic() {
+        return "CharAutoReplace.settings";
+    }
+
     @Override
     public @Nullable JComponent createComponent() {
-        mainPanel = new JPanel(new BorderLayout());
+        RegionPolicy.ReplaceMode[] modes = RegionPolicy.ReplaceMode.values();
+        codeModeCombo = createModeCombo(modes);
+        commentModeCombo = createModeCombo(modes);
+        stringModeCombo = createModeCombo(modes);
+        commitModeCombo = createModeCombo(modes);
+        consoleModeCombo = createModeCombo(modes);
+        plainTextModeCombo = createModeCombo(modes);
+        showHintCheckBox = new JCheckBox("显示替换提示");
 
-        JPanel contentPanel = new JPanel();
-        contentPanel.setLayout(new BoxLayout(contentPanel, BoxLayout.Y_AXIS));
+        // FormBuilder 链式布局：保持原 UI 的组件、顺序与文案
+        // （映射表 → 分隔线 → 六个区域下拉 → 自适应提示 → 分隔线 → 显示替换提示 → 恢复默认）。
+        FormBuilder builder = FormBuilder.createFormBuilder()
+                .addComponent(createMappingPanel())
+                .addSeparator()
+                .addLabeledComponent("代码区 (CODE):", codeModeCombo)
+                .addLabeledComponent("控制台 (CONSOLE):", consoleModeCombo)
+                .addLabeledComponent("注释区 (COMMENT):", commentModeCombo)
+                .addLabeledComponent("纯文本 (PLAIN_TEXT):", plainTextModeCombo)
+                .addLabeledComponent("字符串区 (STRING):", stringModeCombo)
+                .addLabeledComponent("提交框 (COMMIT):", commitModeCombo)
+                .addComponent(createAdaptiveHintLabel())
+                .addSeparator()
+                .addComponent(showHintCheckBox)
+                .addComponent(createResetLink())
+                .addComponentFillVertically(new JPanel(), 0);
 
-        contentPanel.add(createMappingPanel());
-        contentPanel.add(Box.createVerticalStrut(10));
-        contentPanel.add(createRegionPolicyPanel());
-        contentPanel.add(Box.createVerticalStrut(10));
-        contentPanel.add(createOptionsPanel());
-        contentPanel.add(Box.createVerticalStrut(10));
-        contentPanel.add(createResetLink());
-
-        mainPanel.add(contentPanel, BorderLayout.NORTH);
+        mainPanel = builder.getPanel();
         return mainPanel;
     }
 
@@ -91,108 +121,24 @@ public class CharAutoReplaceConfigurable implements Configurable {
         }
     }
 
-    private JComponent createRegionPolicyPanel() {
-        JPanel panel = new JPanel(new GridBagLayout());
-        GridBagConstraints labelGbc = new GridBagConstraints();
-        labelGbc.anchor = GridBagConstraints.WEST;
-        labelGbc.insets = new Insets(4, 4, 4, 8);
-        labelGbc.gridx = 0;
-
-        GridBagConstraints comboGbc = new GridBagConstraints();
-        comboGbc.anchor = GridBagConstraints.WEST;
-        comboGbc.insets = new Insets(4, 0, 4, 16);
-        comboGbc.gridx = 1;
-
-        GridBagConstraints labelGbc2 = new GridBagConstraints();
-        labelGbc2.anchor = GridBagConstraints.WEST;
-        labelGbc2.insets = new Insets(4, 4, 4, 8);
-        labelGbc2.gridx = 2;
-
-        GridBagConstraints comboGbc2 = new GridBagConstraints();
-        comboGbc2.anchor = GridBagConstraints.WEST;
-        comboGbc2.insets = new Insets(4, 0, 4, 4);
-        comboGbc2.gridx = 3;
-        comboGbc2.gridwidth = GridBagConstraints.REMAINDER;
-
-        RegionPolicy.ReplaceMode[] modes = RegionPolicy.ReplaceMode.values();
-        String[] modeLabels = {"开 (ALWAYS)", "关 (NEVER)", "自适应 (ADAPTIVE)"};
-
-        int row = 0;
-
-        labelGbc.gridy = row;
-        panel.add(new JLabel("代码区 (CODE):"), labelGbc);
-        codeModeCombo = new ComboBox<>(modes);
-        codeModeCombo.setRenderer(new ModeListCellRenderer(modeLabels));
-        comboGbc.gridy = row;
-        panel.add(codeModeCombo, comboGbc);
-
-        labelGbc2.gridy = row;
-        panel.add(new JLabel("控制台 (CONSOLE):"), labelGbc2);
-        consoleModeCombo = new ComboBox<>(modes);
-        consoleModeCombo.setRenderer(new ModeListCellRenderer(modeLabels));
-        comboGbc2.gridy = row;
-        panel.add(consoleModeCombo, comboGbc2);
-
-        row++;
-
-        labelGbc.gridy = row;
-        panel.add(new JLabel("注释区 (COMMENT):"), labelGbc);
-        commentModeCombo = new ComboBox<>(modes);
-        commentModeCombo.setRenderer(new ModeListCellRenderer(modeLabels));
-        comboGbc.gridy = row;
-        panel.add(commentModeCombo, comboGbc);
-
-        labelGbc2.gridy = row;
-        panel.add(new JLabel("纯文本 (PLAIN_TEXT):"), labelGbc2);
-        plainTextModeCombo = new ComboBox<>(modes);
-        plainTextModeCombo.setRenderer(new ModeListCellRenderer(modeLabels));
-        comboGbc2.gridy = row;
-        panel.add(plainTextModeCombo, comboGbc2);
-
-        row++;
-
-        labelGbc.gridy = row;
-        panel.add(new JLabel("字符串区 (STRING):"), labelGbc);
-        stringModeCombo = new ComboBox<>(modes);
-        stringModeCombo.setRenderer(new ModeListCellRenderer(modeLabels));
-        comboGbc.gridy = row;
-        panel.add(stringModeCombo, comboGbc);
-
-        labelGbc2.gridy = row;
-        panel.add(new JLabel(""), labelGbc2);
-
-        row++;
-
-        labelGbc.gridy = row;
-        panel.add(new JLabel("提交框 (COMMIT):"), labelGbc);
-        commitModeCombo = new ComboBox<>(modes);
-        commitModeCombo.setRenderer(new ModeListCellRenderer(modeLabels));
-        comboGbc.gridy = row;
-        panel.add(commitModeCombo, comboGbc);
-
-        JLabel hint = new JLabel("<html><i>自适应为启发式判断：按光标前文中英文语境决定</i></html>");
-        hint.setForeground(Color.GRAY);
-        row++;
-        labelGbc.gridy = row;
-        labelGbc.gridwidth = GridBagConstraints.REMAINDER;
-        panel.add(hint, labelGbc);
-
-        return panel;
+    private ComboBox<RegionPolicy.ReplaceMode> createModeCombo(RegionPolicy.ReplaceMode[] modes) {
+        ComboBox<RegionPolicy.ReplaceMode> combo = new ComboBox<>(modes);
+        combo.setRenderer(new ModeListCellRenderer(MODE_LABELS));
+        return combo;
     }
 
-    private JComponent createOptionsPanel() {
-        JPanel panel = new JPanel(new FlowLayout(FlowLayout.LEFT));
-        showHintCheckBox = new JCheckBox("显示替换提示");
-        panel.add(showHintCheckBox);
-        return panel;
+    private JComponent createAdaptiveHintLabel() {
+        JLabel hint = new JLabel("<html><i>自适应为启发式判断：按光标前文中英文语境决定</i></html>");
+        hint.setForeground(Color.GRAY);
+        return hint;
     }
 
     private JComponent createResetLink() {
-        JPanel panel = new JPanel(new FlowLayout(FlowLayout.LEFT));
-        JButton resetButton = new JButton("恢复默认");
-        resetButton.addActionListener(e -> resetToDefaults());
-        panel.add(resetButton);
-        return panel;
+        // 平台标准链接控件 ActionLink（extends JButton，com.intellij.ui.components 包），
+        // 文案与触发行为保持不变。
+        // 显式指定 ActionListener 目标类型：ActionLink 另有 (String, Function1) 构造器，
+        // 不加 cast 时 void lambda 会触发 "reference to ActionLink is ambiguous" 编译错误。
+        return new ActionLink("恢复默认", (ActionListener) e -> resetToDefaults());
     }
 
     private void resetToDefaults() {
