@@ -7,6 +7,8 @@
         characters (as Chinese punctuation) are automatically replaced by configured English characters. It improves the efficiency of writing code and increases the service life of the keyboard. Don't worry about writing comments and code and forgetting to switch input methods anymore.
         <br/>
         (中文字符自动替换成英文字符插件，再也不用担心写注释和代码忘记切换输入法了。利用规则进行自动替换，替换规则自定义。)
+        <br/> (PS:虽然大家都用上AI编程了，这个插件用处不大了。
+        但我还是更新了一下，增加了一个自适应替换的配置，根据当前输入的内容判断是否要进行替换，送给那些像我一样内网开发没有使用AI编程的朋友们)
         ]]>
 
 

@@ -22,8 +22,11 @@ import org.jetbrains.annotations.NotNull;
 /**
  * 描述: 中文字符检测处理 —— charTyped 管线入口。
  *
- * <p>管线流程：O(1) 候选门控 → PSI 提交（commitDocument，失败落回文本兜底）→ EditorContext → 前置规则链 → 区域分类 → 策略决策 → 转换 → 替换执行。
- * 彻底移除每键 add/removeDocumentListener，替换在 WriteCommandAction 内同步完成（单步撤销）。
+ * <p>管线流程：O(1) 候选门控 → PSI 提交（commitDocument，失败落回文本兜底）→ EditorContext → 前置规则链 → 区域分类 → 策略决策 → 只读转换计算 → 推迟替换执行。
+ * 彻底移除每键 add/removeDocumentListener；替换<b>不在</b> charTyped 内同步写入——charTyped 同步发生在
+ * 平台键入命令内部，此刻 WriteCommandAction 会被嵌套内联进键入撤销组，Ctrl+Z 会连带撤掉整段键入。
+ * 改为暂存待替换项后经 invokeLater 推迟到 EDT 稍后、以独立 WriteCommandAction 撤销命令执行
+ * （键入命令已 finish，替换自成撤销步，可单独撤销）。
  *
  * @author : best.xu
  */
@@ -79,6 +82,9 @@ public class ChineseCharCheckHandler extends TypedHandlerDelegate {
         }
 
         CharConverter converter = settings.createConverter();
+        // 决策为 REPLACE：此刻仍在平台键入命令内部，WriteCommandAction 会被嵌套内联进键入撤销组。
+        // 由 execute 在只读计算后经 invokeLater 推迟到 EDT 稍后执行替换（届时键入命令已 finish，
+        // 替换自成独立撤销命令，可单独撤销）；推迟后的重校验见 ReplacementExecutor#apply。
         ReplacementExecutor.execute(ctx, converter, snapshot);
 
         return Result.CONTINUE;

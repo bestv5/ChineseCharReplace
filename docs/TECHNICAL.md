@@ -37,7 +37,7 @@ CharAutoReplace/
 │   │   ├── PolicyEngine.java                 # 区域策略引擎（ALWAYS/NEVER/ADAPTIVE）
 │   │   ├── RegionCapabilityCache.java        # 语言兜底能力缓存（token/Commenter 可用性，按 language.getID() 惰性探测）
 │   │   ├── RegionClassifier.java             # 区域分类器（UNKNOWN 兜底改 PLAIN_TEXT 自适应）
-│   │   └── ReplacementExecutor.java          # 同步替换 + 光标修正 + 单步撤销 + 提示
+│   │   └── ReplacementExecutor.java          # 两阶段替换（只读 compute → invokeLater 推迟 apply）：RangeMarker 重校验 + 独立撤销命令 + 平台托管光标 + 提示
 │   ├── handler/
 │   │   └── ChineseCharCheckHandler.java      # charTyped 管线入口（PSI 提交前置 + 文本兜底）
 │   ├── region/
@@ -90,7 +90,9 @@ PolicyEngine.decide() — 策略判定（ALWAYS/NEVER/ADAPTIVE）
      ↓
 CharConverter.convert() — 三层转换
      ↓
-ReplacementExecutor.execute() — WriteCommandAction 替换 + 单步撤销
+ReplacementExecutor.compute() — 只读计算，暂存待替换项（区间以 RangeMarker 承载）
+     ↓
+（invokeLater 推迟到键入命令结束后）apply() — marker 实时区间重校验 → WriteCommandAction 独立撤销命令写入（单步撤销，光标由平台 caret marker 自动平移）
 ```
 
 ### 3.2 区域策略
@@ -168,7 +170,7 @@ COMMENT/STRING/CODE 由 `CommentContextResolver` 按三级阶梯判定，降级�
 - **不可变快照**：配置变更时构建新快照，读取路径无锁
 - **规则链短路**：前置规则任一失败即返回，不进入区域分类
 - **能力缓存**：语言兜底能力按 `language.getID()` 惰性探测一次并缓存，兜底路径按能力降级短路
-- **WriteCommandAction**：单步撤销，替换操作可一次性撤回
+- **两阶段替换**：charTyped 内只读 compute 暂存（区间以 RangeMarker 承载，随文档编辑自动平移，同批多 pending 互不失效）→ invokeLater 推迟到键入命令结束后 apply（marker 实时区间重校验 + 命令内 TOCTOU 二次复核）→ WriteCommandAction 独立撤销命令写入，替换操作可一次性撤回；光标不做手动重定位，由平台 caret marker 随 replaceString 自动平移
 
 ## 6. 兼容性
 

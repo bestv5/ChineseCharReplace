@@ -29,7 +29,7 @@ dependencies {
 }
 
 group 'com.haojiyou'
-version '1.8.0-beta1'
+version '2.0.0-beta1'
 
 // 统一 javac 源码编码为 UTF-8，避免中文 Windows 回退 GBK 导致“不可映射字符”编译错误
 tasks.withType(JavaCompile) {
