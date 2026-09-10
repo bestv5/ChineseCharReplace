@@ -1,6 +1,7 @@
 package com.haojiyou.cnchar.core;
 
 import com.haojiyou.cnchar.convert.CharConverter;
+import com.haojiyou.cnchar.region.InputRegion;
 import com.haojiyou.cnchar.settings.CharAutoReplaceSettings;
 import com.haojiyou.cnchar.settings.MappingRule;
 import com.intellij.openapi.command.CommandEvent;
@@ -35,7 +36,10 @@ import java.util.List;
  *   <li>已覆盖：等长单字符替换（全角，→半角；表意空格 U+3000→半角空格，执行级守护）、
  *       一对多替换（…→...）后光标置于替换串末尾、
  *       多字符尾部匹配（前文恰为匹配键时长度正确）、无候选/无映射时文档不变、
- *       替换并入单一 {@code WriteCommandAction} 撤销步（一步可回退到替换前文本）。</li>
+ *       替换并入单一 {@code WriteCommandAction} 撤销步（一步可回退到替换前文本）、
+ *       ADAPTIVE 语境窗口提取边界（行中/行首/换行/16 字符截断/不跨行，自 EditorContextTest 迁入——
+ *       IC-2020.3 的 {@code DocumentImpl.getText()} 内部走 {@code ReadAction.compute}，
+ *       脱平台单测无 Application 必 NPE，故依赖本类 fixture 真实文档）。</li>
  *   <li>受平台限制未直接触发：<b>HintService 提示</b>。{@code ReplacementExecutor.showHint} 依赖
  *       {@code ApplicationManager.getService(HintService.class)}，而纯平台 fixture 不加载本插件的
  *       plugin.xml，服务未注册；且生产代码用 {@code showHint=false} 默认关闭提示，故所有用例均在
@@ -113,6 +117,120 @@ public class ReplacementExecutorIT extends LightPlatformCodeInsightFixtureTestCa
                 "abc ", document.getText());
         assertEquals("等长替换后光标应停在替换串末尾（replaceStart 3 + 1 = 4）", 4,
                 myFixture.getEditor().getCaretModel().getOffset());
+    }
+
+    // ---- P0 回归：ADAPTIVE 语境窗口必须剔除刚键入字符 ----
+
+    /**
+     * 端到端回归（真实 Document + EditorContext 生产构造路径）：前文 "hello" 时键入 '。'，
+     * 此刻文档为 "hello。"、光标 offset=6。修复前窗口含键入字符（"hello。"），键入的标点把上下文
+     * 自污染成中文语境 → PolicyEngine 静默 SKIP；修复后窗口为 "hello"（窗口终点 offset-1）
+     * → 英文语境 REPLACE，且真实执行替换。
+     *
+     * <p>走完整生产管线：{@link RegionClassifier#classify} 判区 → {@link PolicyEngine#decide} 决策 →
+     * {@link ReplacementExecutor#execute} 写入替换，不硬编码区域、不仅断言决策。
+     */
+    public void testContextWindowExcludesTypedCharInAdaptiveRegion() {
+        // "hello。"：h0 e1 l2 l3 o4 。5；光标 offset=6，typedChar=中文句号
+        myFixture.configureByText("a.txt", "hello\u3002<caret>");
+        Editor editor = myFixture.getEditor();
+        Document document = editor.getDocument();
+        EditorContext ctx = new EditorContext(
+                getProject(), editor, document, myFixture.getFile(), myFixture.getCaretOffset(), '\u3002');
+
+        assertEquals("语境窗口必须剔除刚键入的句号（窗口终点 offset-1）", "hello", ctx.getTextBeforeCursor());
+
+        // 真实端到端：区域分类 → 策略决策 → 执行替换
+        CharAutoReplaceSettings.Snapshot snapshot = defaultSnapshot();
+        InputRegion region = RegionClassifier.classify(ctx);
+        PolicyEngine.Decision decision = PolicyEngine.decide(region, ctx, snapshot);
+        assertEquals("a.txt 为 PLAIN_TEXT（默认 ADAPTIVE）：英文语境键入'。'应 REPLACE（修复前被自污染 SKIP）",
+                PolicyEngine.Decision.REPLACE, decision);
+        if (decision == PolicyEngine.Decision.REPLACE) {
+            ReplacementExecutor.execute(ctx, converterOf(snapshot), snapshot);
+        }
+        assertEquals("ADAPTIVE 英文语境键入'。'应被端到端替换", "hello.", document.getText());
+    }
+
+    // ---- EditorContext 语境窗口提取边界（自 EditorContextTest 迁入，fixture 真实文档驱动）----
+
+    /** 行中键入排除键入字符：文档 "hello。" 光标末尾 → 窗口 "hello"。 */
+    public void testWindowMidLineTypingExcludesTypedChar() {
+        // "hello。"：h0 e1 l2 l3 o4 。5；光标 offset=6
+        myFixture.configureByText("a.txt", "hello\u3002<caret>");
+        assertEquals("行中键入：窗口必须剔除刚键入的字符", "hello",
+                EditorContext.extractTextBefore(
+                        myFixture.getEditor().getDocument(), myFixture.getCaretOffset()));
+    }
+
+    /** 剔除键入字符后的窗口送入检测器 → 英文语境（P0 自污染回归闭环）。 */
+    public void testWindowFeedsDetectorAsEnglishContext() {
+        myFixture.configureByText("a.txt", "hello\u3002<caret>");
+        String window = EditorContext.extractTextBefore(
+                myFixture.getEditor().getDocument(), myFixture.getCaretOffset());
+        assertFalse("剔除键入的'。'后窗口为纯英文，不应被判为中文语境",
+                CjkContextDetector.isChineseContext(window));
+    }
+
+    /** 中文前文仍可识别：文档 "你好。" 光标末尾 → 窗口 "你好" 且判为中文语境。 */
+    public void testWindowChinesePrefixStillDetected() {
+        // "你好。"：你0 好1 。2；光标 offset=3
+        myFixture.configureByText("a.txt", "你好\u3002<caret>");
+        String window = EditorContext.extractTextBefore(
+                myFixture.getEditor().getDocument(), myFixture.getCaretOffset());
+        assertEquals("中文前文仍可识别：窗口应为键入字符前的中文", "你好", window);
+        assertTrue("中文前文应被判为中文语境（不替换方向）",
+                CjkContextDetector.isChineseContext(window));
+    }
+
+    /** 行首键入 → 空窗口（仅断言窗口内容，不掺入决策语义）。 */
+    public void testWindowTypingAtLineStartYieldsEmpty() {
+        // "ab\nx"：a0 b1 \n2 x3；光标 offset=4，键入的 x 为第 2 行首字符
+        myFixture.configureByText("a.txt", "ab\nx<caret>");
+        assertEquals("行首键入 → 空窗口（不跨行取更早的行）", "",
+                EditorContext.extractTextBefore(
+                        myFixture.getEditor().getDocument(), myFixture.getCaretOffset()));
+    }
+
+    /** 键入换行符 → 窗口为上一行行尾内容（IC-2020.3 行分隔符归前行，不含换行符）。 */
+    public void testWindowTypedNewlineYieldsPreviousLineTail() {
+        // "ab\n"：a0 b1 \n2；光标 offset=3；窗口 = 换行符之前同一行内容 "ab"
+        myFixture.configureByText("a.txt", "ab\n<caret>");
+        assertEquals("键入换行符 → 窗口为上一行行尾内容（≤16 字符，不含换行符）", "ab",
+                EditorContext.extractTextBefore(
+                        myFixture.getEditor().getDocument(), myFixture.getCaretOffset()));
+    }
+
+    /** 16 字符 lookback 截断：长行中键入 → 窗口恰为键入字符前 16 字符。 */
+    public void testWindowLookbackCappedAtSixteen() {
+        // 20 个 ASCII 字母后键入'。'：窗口 = 键入字符前 16 字符（下标 4..19）
+        StringBuilder text = new StringBuilder();
+        for (int i = 0; i < 20; i++) {
+            text.append((char) ('a' + i));
+        }
+        text.append('\u3002');
+        // "abcdefghijklmnopqrst。"：'。' 位于下标 20，光标 offset=21
+        myFixture.configureByText("a.txt", text.toString() + "<caret>");
+        assertEquals("16 字符 lookback 截断：窗口恰为键入字符前 16 字符", "efghijklmnopqrst",
+                EditorContext.extractTextBefore(
+                        myFixture.getEditor().getDocument(), myFixture.getCaretOffset()));
+    }
+
+    /** 回溯不跨行：多行长行中键入 → 窗口不越过本行行首、不含上一行内容。 */
+    public void testWindowLookbackNeverCrossesLineStart() {
+        // 第 2 行 20 个数字字符 + 键入'。'：窗口应为本行内其前 16 字符，不含第 1 行的 "ab" 与换行符
+        StringBuilder text = new StringBuilder("ab\n");
+        for (int i = 0; i < 20; i++) {
+            text.append((char) ('0' + i % 10));
+        }
+        text.append('\u3002');
+        // "ab\n01234567890123456789。"：第 2 行起点 offset=3，'。' 位于下标 23，光标 offset=24
+        myFixture.configureByText("a.txt", text.toString() + "<caret>");
+        String window = EditorContext.extractTextBefore(
+                myFixture.getEditor().getDocument(), myFixture.getCaretOffset());
+        assertEquals("回溯不跨行：窗口为本行内键入字符前 16 字符", "4567890123456789", window);
+        assertFalse("窗口不得跨行包含换行符", window.contains("\n"));
+        assertFalse("窗口不得包含上一行内容", window.startsWith("ab"));
     }
 
     // ---- 一对多替换（…→...）：光标必须置于替换串末尾 ----

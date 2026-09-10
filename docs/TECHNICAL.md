@@ -188,3 +188,49 @@ COMMENT/STRING/CODE 由 `CommentContextResolver` 按三级阶梯判定，降级�
 
 - **UNKNOWN→PLAIN_TEXT 端到端归类**：在真实编辑器中构造无法判定上下文的场景（如光标偏移越界、无任何可用判据），确认其走纯文本区自适应策略（默认按光标前文中英文语境决策），而非旧的代码区恒替换；无 PSI 体系的场景仍应判为 UNREACHABLE 恒排除。
 - **替换提示出现/消失时机**：提示已迁移平台公共 API，定位与隐藏 flags 为平台默认值（原精确偏移 (12,0) 与 hide flags=12 不再保留）；重点观察连续打字、滚动、任意按键时提示的出现与隐藏感知是否可接受，如出现可感知偏差再评估处理方案（勿直接改回内部 API）。
+
+## 9. IntelliJ Platform Gradle Plugin 2.x 升级分析
+
+> 信息来源：JetBrains 官方 Gradle IntelliJ Plugin 2.x 文档 Requirements 与 1.x→2.x 迁移指南；标注「待验证」的条目尚未在本项目实测。
+
+### 9.1 结论：暂不升级
+
+Gradle IntelliJ Plugin 2.x 官方最低要求为构建目标平台 IntelliJ Platform 2023.3、Gradle ≥ 9.0、Java Runtime 17，与本项目当前组合 **IC-2020.3 + Gradle 6.8 + Java 11** 硬性互斥。建议维持 1.x（`org.jetbrains.intellij` 1.1.2）+ IC-2020.3 发布 1.8.0-beta1，待未来决定放弃 2020.3–2023.2 用户时再整体升级。
+
+### 9.2 2.x 升级的好处
+
+- 1.x 已冻结不再维护（末版 1.17.4）；
+- 2024.2+ 平台新模块布局仅 2.x 支持；
+- 平台依赖改为标准 Maven 坐标 + `intellijPlatform { defaultRepositories() }`；
+- `verifyPlugin` / `pluginVerification` 与测试沙箱体系更完善。
+
+### 9.3 升级代价对照表
+
+| 项目 | 当前（1.x） | 升级后（2.x） |
+|------|-------------|---------------|
+| 插件 id | `org.jetbrains.intellij` 1.1.2 | `org.jetbrains.intellij.platform` 2.x |
+| 构建目标 | IC-2020.3 | 最低 IC-2023.3（丢失 2020.3–2023.2 用户） |
+| Gradle | 6.8 | ≥ 9.0（需升级 wrapper） |
+| Java | 11 | 17 |
+| DSL | `intellij { ... }` | `intellijPlatform { ... }` |
+| sinceBuild 配置 | `patchPluginXml { sinceBuild = '203' }` | `pluginConfiguration { ideaVersion { sinceBuild = '233' } }` |
+| searchable options | `buildSearchableOptions` 默认可用 | 需显式关闭（本项目有 `applicationConfigurable`） |
+| 运行/校验任务 | `runIde` / `runPluginVerifier` | `runIde` 保留；`runPluginVerifier` 改名 `verifyPlugin` |
+
+### 9.4 代码兼容性预估
+
+`HintManager`、`Editor`、`typedHandler` 扩展点在新平台（2023.3+）均存在，预计无需改码；仍需 `verifyPlugin` + `runIde` 实测确认。
+
+### 9.5 未来升级顺序建议
+
+1. Gradle 9 wrapper；
+2. 换插件 id（`org.jetbrains.intellij.platform`）；
+3. 目标平台 2023.3；
+4. Java 17；
+5. sinceBuild = 233；
+6. `runIde` / `verifyPlugin` 实测。
+
+### 9.6 待验证项
+
+- 2.x 下 `untilBuild` 无上限的写法；
+- `runIde` 的 autoReload 插件属性新名称。
